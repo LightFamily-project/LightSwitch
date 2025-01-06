@@ -1,4 +1,4 @@
-package com.lightswitch.lightswitch
+package com.lightswitch
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
