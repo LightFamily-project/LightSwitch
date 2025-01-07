@@ -7,7 +7,7 @@ plugins {
     id("org.graalvm.buildtools.native") version "0.10.4"
 }
 
-group = "com.backend"
+group = "lightswitch"
 version = "0.0.1-SNAPSHOT"
 
 java {
