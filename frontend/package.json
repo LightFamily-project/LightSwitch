@@ -10,7 +10,9 @@
     "lint:fix": "eslint src --fix && pnpm format",
     "lint:strict": "eslint --max-warnings=0 src",
     "format": "prettier -w .",
-    "format:check": "prettier -c ."
+    "format:check": "prettier -c .",
+    "tsc": "tsc --noEmit",
+    "tsc:strict": "tsc --strict --noEmit"
   },
   "dependencies": {
     "next": "15.1.4",
