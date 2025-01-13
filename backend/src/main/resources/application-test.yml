@@ -1,0 +1,11 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  datasource:
+    url: "jdbc:sqlite::memory:"

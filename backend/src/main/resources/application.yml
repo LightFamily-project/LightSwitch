@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: LightSwitch
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+  datasource:
+    url: jdbc:sqlite:lightswitch.sqlite
+    driver-class-name: org.sqlite.JDBC
