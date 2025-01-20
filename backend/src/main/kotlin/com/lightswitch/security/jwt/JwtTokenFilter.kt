@@ -16,7 +16,7 @@ class JwtTokenFilter(private val jwtTokenProvider: JwtTokenProvider) : OncePerRe
     private val TOKEN_PREFIX = "Bearer "
 
     @Throws(ServletException::class, IOException::class)
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    public override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val token = getTokenFromRequest(request)
 
         if (token != null && jwtTokenProvider.validateToken(token)) {

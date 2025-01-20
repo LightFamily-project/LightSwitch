@@ -4,14 +4,15 @@ import org.springframework.stereotype.Component
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import jakarta.annotation.PostConstruct
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import java.security.SecureRandom
 import java.util.*
 
 @Component
-class JwtTokenProvider {
+class JwtTokenProvider( @Value("\${jwt.secret}") private var secretKey: String) {
 
-    private var secretKey = "mysecretkey"
     private val tokenValidTime = 86400000 //24 hrs
 
     @PostConstruct
