@@ -1,15 +1,16 @@
 import { Boxes, CirclePlay, LayoutDashboard, Search, SquareChartGantt, Users } from "lucide-react"
 
-import LightSwitch from "../../../public/images/LigthtSwitch-2.png";
 import Image from "next/image";
 
 export function AppSidebar() {
+  const LightSwitchPath = "/images/LigthtSwitch-2.png";
+  
   return (
     <div className="flex h-screen bg-background">
       <div className="w-64 border-r bg-[#18181B] p-4">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-8 w-8 rounded-md bg-primary" />
-          <Image className="bg-white rounded-md" src={LightSwitch} width={40} alt="로고"/>
+          <Image className="bg-white rounded-md" src={LightSwitchPath} width={40} height={40} alt="로고"/>
           <span className="font-medium text-white">LightSwitch</span>
         </div>
 
