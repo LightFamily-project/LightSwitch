@@ -1,0 +1,7 @@
+.sidebarController {
+  border-radius: 0.2rem;
+}
+
+.sidebarController:hover {
+  background-color: #27272a;
+}

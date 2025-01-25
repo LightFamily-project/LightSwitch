@@ -1,10 +1,7 @@
-import { Button } from '@/components/ui/button';
-
 export default function Home() {
   return (
     <div>
-      <h1>Light Switch</h1>
-      <Button size="lg">Click me</Button>
+      <h1 className="text-white">Light Switch</h1>
     </div>
   );
 }
