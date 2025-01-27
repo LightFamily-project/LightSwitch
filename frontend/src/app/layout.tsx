@@ -1,17 +1,13 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter } from 'next/font/google';
+
+import { LayoutContent } from './LayoutContent';
+
+import { ThemeProvider } from '@/components/theme-provider';
+
 import './globals.css';
-import { AppSidebar } from '@/components/ui/app-sidebar';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Light Switch',
@@ -24,16 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AppSidebar />
-        <main>
-          <div className="flex min-h-screen items-center justify-center bg-gray-100">
-            <div className="w-full">{children}</div>
-          </div>
-        </main>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
+          <LayoutContent>{children}</LayoutContent>
+        </ThemeProvider>
       </body>
     </html>
   );
