@@ -1,45 +1,114 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+'use client';
 
-export default function LoginPage() {
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { defaultUserNameAndPassword } from '@/constants/credentials';
+import { PATHS } from '@/constants/paths';
+import { useAuth } from '@/contexts/AuthContext';
+
+const loginSchema = z.object({
+  id: z.string().nonempty({ message: 'ID is required' }),
+  password: z.string().nonempty({ message: 'Password is required' }),
+});
+type LoginSchemaType = z.infer<typeof loginSchema>;
+
+const LoginPage = () => {
+  const { setRequiresSetup, login } = useAuth();
+  const router = useRouter();
+  const form = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      id: '',
+      password: '',
+    },
+  });
+
+  const submit = async (data: LoginSchemaType) => {
+    if (
+      data.id === defaultUserNameAndPassword &&
+      data.password === defaultUserNameAndPassword
+    ) {
+      router.replace(PATHS.SETUP);
+      setRequiresSetup(true);
+    } else {
+      try {
+        await login(data.id, data.password);
+        router.replace(PATHS.FEATURE_FLAG_MANAGEMENT);
+      } catch {
+        form.setError('root', {
+          type: 'manual',
+          message: 'Invalid ID or password',
+        });
+      }
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <Card className="w-[350px]">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Light Switch</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" placeholder="Enter your email" />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                />
-              </div>
-            </div>
+    <Card className="mx-4 w-full max-w-md">
+      <CardHeader className="space-y-2 pb-8">
+        <CardTitle className="text-center text-2xl font-bold">
+          Login to LightSwitch
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-5">
+            <FormField
+              control={form.control}
+              name="id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>User ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Please enter your user ID" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Please enter your password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {form.formState.errors.root && (
+              <FormMessage>{form.formState.errors.root.message}</FormMessage>
+            )}
+
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
           </form>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full">Login</Button>
-        </CardFooter>
-      </Card>
-    </div>
+        </Form>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default LoginPage;
