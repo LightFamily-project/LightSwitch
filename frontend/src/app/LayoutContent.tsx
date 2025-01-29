@@ -18,22 +18,38 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { PATHS } from '@/constants/paths';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const pathItems = [
     {
       title: 'Feature Flags',
       icon: FlagIcon,
-      href: '/',
+      href: PATHS.FEATURE_FLAG_MANAGEMENT,
     },
     {
       title: 'SDK Management',
       icon: SettingsIcon,
-      href: '/sdk',
+      href: PATHS.SDK_MANAGEMENT,
     },
   ];
+
+  if (pathname === PATHS.LOGIN || pathname === PATHS.SETUP) {
+    return (
+      <div className="relative flex min-h-screen flex-col bg-background">
+        <header className="absolute right-8 top-8">
+          <ThemeToggle />
+        </header>
+        <main className="flex grow items-center justify-center p-6">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -47,10 +63,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
               width={48}
               height={48}
             />
-            <h1 className="text-xl font-bold transition-opacity group-data-[state=collapsed]:hidden">
+            <h1 className="text-xl font-bold group-data-[collapsible=icon]:hidden">
               LightSwitch
             </h1>
-            <SidebarTrigger className="ml-auto mr-0 transition-opacity group-data-[state=collapsed]:hidden" />
+            <SidebarTrigger className="ml-auto mr-0 group-data-[collapsible=icon]:hidden" />
           </SidebarHeader>
 
           <SidebarContent className="px-2">
@@ -75,7 +91,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <ThemeToggle className="p-3">
+                  <ThemeToggle className="p-3" variant="ghost">
                     <span className="ml-2 transition-opacity group-data-[state=collapsed]:hidden">
                       Theme
                     </span>
@@ -83,7 +99,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton onClick={logout}>
                   <LogOutIcon />
                   <span>Logout</span>
                 </SidebarMenuButton>
