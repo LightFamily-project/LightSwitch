@@ -1,62 +1,124 @@
 package com.lightswitch.security.jwt
 
+import com.lightswitch.infrastructure.database.entity.User
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.security.Keys
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import java.security.SecureRandom
+import org.mockito.MockitoAnnotations
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class JwtTokenProviderTest {
 
     private lateinit var jwtTokenProvider: JwtTokenProvider
-    private lateinit var mockAuthentication: Authentication
-
-    private val username = "testUser"
-    private val password = "password123"
+    private val secretKey =
+        "64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff" // 테스트용 base64 인코딩된 비밀 키
+    val user = User(
+        id = 1L,
+        username = "testUser",
+        passwordHash = "passwordHash",
+        lastLoginAt = null
+    )
 
     @BeforeEach
     fun setUp() {
-        jwtTokenProvider = JwtTokenProvider(secretKey = generateSecretKey())
-        mockAuthentication = UsernamePasswordAuthenticationToken(username, password)
-    }
-
-    fun generateSecretKey(): String {
-        val secureRandom = SecureRandom()
-        val secretKeyBytes = ByteArray(512)
-        secureRandom.nextBytes(secretKeyBytes)
-        return Base64.getEncoder().encodeToString(secretKeyBytes)
+        MockitoAnnotations.openMocks(this)
+        jwtTokenProvider = JwtTokenProvider(secretKey)
     }
 
     @Test
-    fun `should create valid JWT token`() {
-        val token = jwtTokenProvider.createToken(mockAuthentication)
+    fun `generateJwtToken should return valid JWT token`() {
+        val jwtToken = jwtTokenProvider.generateJwtToken(user.id!!, user)
 
-        assert(token.isNotEmpty())
-
-        val extractedUsername = jwtTokenProvider.getUserNameFromToken(token)
-        assertEquals(username, extractedUsername)
+        assertNotNull(jwtToken.accessToken)
+        assertNotNull(jwtToken.refreshToken)
+        assertTrue(jwtToken.accessTokenExpiredDate!! > 0)
     }
 
     @Test
-    fun `should validate valid token`() {
-        val token = jwtTokenProvider.createToken(mockAuthentication)
-        assertTrue(jwtTokenProvider.validateToken(token))
+    fun `generateJwtAccessToken should return only access token`() {
+        val now = Date()
+        val jwtToken = jwtTokenProvider.generateJwtAccessToken(user.id!!, user, now)
+
+        assertNotNull(jwtToken.accessToken)
+        assertNull(jwtToken.refreshToken)
+        assertTrue(jwtToken.accessTokenExpiredDate!! > 0)
     }
 
     @Test
-    fun `should return false for invalid token`() {
-        val invalidToken = "invalid.jwt.token"
-        assertFalse(jwtTokenProvider.validateToken(invalidToken))
+    fun `validateToken should return true for valid token`() {
+        val jwtToken = jwtTokenProvider.generateJwtToken(user.id!!, user)
+
+        val isValid = jwtTokenProvider.validateToken(jwtToken.accessToken!!)
+
+        assertTrue(isValid)
     }
 
     @Test
-    fun `should extract authentication from token`() {
-        val token = jwtTokenProvider.createToken(mockAuthentication)
-        val authentication = jwtTokenProvider.getAuthentication(token)
-        assertEquals(username, authentication.name)
+    fun `validateToken should return false for expired token`() {
+        val expiredToken = "invalidExpiredToken"
+
+        val isValid = jwtTokenProvider.validateToken(expiredToken)
+
+        assertFalse(isValid)
     }
+
+    @Test
+    fun `getAuthentication should return valid authentication object`() {
+        val jwtToken = jwtTokenProvider.generateJwtToken(user.id!!, user)
+
+        val authentication = jwtTokenProvider.getAuthentication(jwtToken.accessToken!!)
+
+        assertNotNull(authentication)
+        assertEquals(user.id.toString(), authentication.name)
+    }
+
+    @Test
+    fun `getRefreshTokenSubject should return correct user ID for refresh token`() {
+        val jwtToken = jwtTokenProvider.generateJwtToken(user.id!!, user)
+
+        val refreshTokenSubject = jwtTokenProvider.getRefreshTokenSubject(jwtToken.refreshToken!!)
+
+        assertEquals(user.id, refreshTokenSubject)
+    }
+
+    @Test
+    fun `refreshTokenPeriodCheck should return true if refresh token expired more than 3 days`() {
+        val now = Date()
+        val issuedTime = Date(now.time - 5 * 24 * 60 * 60 * 1000L)
+        val expiredTime = Date(now.time + 4 * 24 * 60 * 60 * 1000L)
+
+        val refreshToken = Jwts.builder()
+            .setSubject("1")
+            .setIssuedAt(issuedTime)
+            .setExpiration(expiredTime)
+            .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
+            .compact()
+
+        val result = jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken)
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `refreshTokenPeriodCheck should return false if refresh token expired less than 3 days`() {
+        val now = Date()
+        val issuedTime = Date(now.time - 5 * 24 * 60 * 60 * 1000L)
+        val expiredTime = Date(now.time + 2 * 24 * 60 * 60 * 1000L)
+
+        val refreshToken = Jwts.builder()
+            .setSubject("1")
+            .setIssuedAt(issuedTime)
+            .setExpiration(expiredTime)
+            .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
+            .compact()
+
+        val result = jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken)
+
+        assertFalse(result)
+    }
+
 }
