@@ -23,7 +23,7 @@ class AuthService(
 
     @Transactional
     fun login(username: String, password: String): JwtToken {
-        val user = userRepository.findByUsername(username).orElseThrow {
+        val user = userRepository.findByUsername(username) ?: run {
             throw BusinessException("User with username $username not found")
         }
 
@@ -76,6 +76,7 @@ class AuthService(
             newToken = jwtTokenProvider.generateJwtAccessToken(userId, user, Date())
         }
 
-        return newToken
+            else -> jwtTokenProvider.generateJwtAccessToken(userId, user, Date())
+        }
     }
 }

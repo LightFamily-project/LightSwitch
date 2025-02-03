@@ -44,7 +44,7 @@ class AuthServiceTest {
     )
 
     private val refreshToken = RefreshToken(
-        key = 1L,
+        userId = 1L,
         value = "refreshToken"
     )
 
@@ -66,7 +66,7 @@ class AuthServiceTest {
         val jwtToken = JwtToken("accessToken", "refreshToken", 1800)
 
         Mockito.`when`(userRepository.findByUsername(username))
-            .thenReturn(Optional.of(user))
+            .thenReturn(user)
 
         Mockito.`when`(passwordEncoder.matches(password, user.passwordHash))
             .thenReturn(true)
@@ -87,7 +87,7 @@ class AuthServiceTest {
         val password = "somePassword"
 
         Mockito.`when`(userRepository.findByUsername(username))
-            .thenReturn(Optional.empty())
+            .thenReturn(null)
 
         val exception = assertThrows(BusinessException::class.java) {
             authService.login(username, password)
@@ -101,7 +101,7 @@ class AuthServiceTest {
         val password = "incorrectPassword"
 
         Mockito.`when`(userRepository.findByUsername(username))
-            .thenReturn(Optional.of(user))
+            .thenReturn(user)
 
         Mockito.`when`(passwordEncoder.matches(password, user.passwordHash))
             .thenReturn(false)
