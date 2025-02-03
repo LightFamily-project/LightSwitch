@@ -30,11 +30,8 @@ class JwtTokenFilter(private val jwtTokenProvider: JwtTokenProvider) : OncePerRe
     }
 
     private fun getTokenFromRequest(request: HttpServletRequest): String? {
-        val bearerToken = request.getHeader(HEADER_STRING)
-        return if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            bearerToken.substring(TOKEN_PREFIX.length)
-        } else {
-            null
-        }
+        return request.getHeader(HEADER_STRING)
+            ?.takeIf { it.startsWith(TOKEN_PREFIX) }
+            ?.removePrefix(TOKEN_PREFIX)
     }
 }
