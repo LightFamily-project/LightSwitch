@@ -74,10 +74,8 @@ class AuthServiceTest {
         Mockito.`when`(jwtTokenProvider.generateJwtToken(user.id!!, user))
             .thenReturn(jwtToken)
 
-        // When
         val result = authService.login(username, password)
 
-        // Then
         assertNotNull(result)
         assertEquals(jwtToken.accessToken, result.accessToken)
         assertEquals(jwtToken.refreshToken, result.refreshToken)
@@ -85,14 +83,12 @@ class AuthServiceTest {
 
     @Test
     fun `login should throw BusinessException when user not found`() {
-        // Given
         val username = "invalidUser"
         val password = "somePassword"
 
         Mockito.`when`(userRepository.findByUsername(username))
             .thenReturn(Optional.empty())
 
-        // When & Then
         val exception = assertThrows(BusinessException::class.java) {
             authService.login(username, password)
         }
@@ -101,7 +97,6 @@ class AuthServiceTest {
 
     @Test
     fun `login should throw BusinessException when password is incorrect`() {
-        // Given
         val username = "testUser"
         val password = "incorrectPassword"
 
@@ -111,7 +106,6 @@ class AuthServiceTest {
         Mockito.`when`(passwordEncoder.matches(password, user.passwordHash))
             .thenReturn(false)
 
-        // When & Then
         val exception = assertThrows(BusinessException::class.java) {
             authService.login(username, password)
         }
@@ -120,7 +114,6 @@ class AuthServiceTest {
 
     @Test
     fun `signup should create a new user when username is not taken`() {
-        // Given
         val username = "newUser"
         val password = "newPassword"
         val passwordHash = "hashedPassword"
@@ -138,24 +131,20 @@ class AuthServiceTest {
         Mockito.`when`(userRepository.save(ArgumentMatchers.any(User::class.java)))
             .thenReturn(newUser)
 
-        // When
         val result = authService.signup(username, password)
 
-        // Then
         assertNotNull(result)
         assertEquals(username, result.username)
     }
 
     @Test
     fun `signup should throw BusinessException when username already exists`() {
-        // Given
         val username = "existingUser"
         val password = "somePassword"
 
         Mockito.`when`(userRepository.existsByUsername(username))
             .thenReturn(true)
 
-        // When & Then
         val exception = assertThrows(BusinessException::class.java) {
             authService.signup(username, password)
         }
@@ -164,7 +153,6 @@ class AuthServiceTest {
 
     @Test
     fun `reissue should return new JwtToken if refresh token is valid and renewal is required`() {
-        // Given
         val userId = 1L
         val token = JwtToken("accessToken", "refreshToken", 1800)
         val newToken = JwtToken("newAccessToken", "newRefreshToken", 1800)
@@ -188,10 +176,8 @@ class AuthServiceTest {
         Mockito.`when`(jwtTokenProvider.generateJwtToken(userId, user))
             .thenReturn(newToken)
 
-        // When
         val result = authService.reissue(token)
 
-        // Then
         assertNotNull(result)
         assertEquals(newToken.accessToken, result?.accessToken)
         assertEquals(newToken.refreshToken, result?.refreshToken)
@@ -199,13 +185,11 @@ class AuthServiceTest {
 
     @Test
     fun `reissue should throw BusinessException if refresh token is invalid`() {
-        // Given
         val invalidRefreshToken = JwtToken("", "invalidToken", 1800)
 
         Mockito.`when`(jwtTokenProvider.validateToken(invalidRefreshToken.refreshToken!!))
             .thenReturn(false)
 
-        // When & Then
         val exception = assertThrows(BusinessException::class.java) {
             authService.reissue(invalidRefreshToken)
         }
@@ -214,7 +198,6 @@ class AuthServiceTest {
 
     @Test
     fun `reissue should return new JwtToken if refresh token is valid but no renewal is required`() {
-        // Given
         val userId = 1L
         val token = JwtToken("accessToken", "refreshToken", 1800)
         val newToken = JwtToken("newAccessToken", null, 1800)
@@ -243,10 +226,8 @@ class AuthServiceTest {
         )
             .thenReturn(newToken)
 
-        // When
         val result = authService.reissue(token)
 
-        // Then
         assertNotNull(result)
         assertEquals(newToken.accessToken, result?.accessToken)
         assertNull(result?.refreshToken)

@@ -15,7 +15,7 @@ class JwtTokenProviderTest {
 
     private lateinit var jwtTokenProvider: JwtTokenProvider
     private val secretKey =
-        "64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff" // 테스트용 base64 인코딩된 비밀 키
+        "64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff"
     val user = User(
         id = 1L,
         username = "testUser",

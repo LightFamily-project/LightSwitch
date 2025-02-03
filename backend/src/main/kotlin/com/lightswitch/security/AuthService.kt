@@ -69,14 +69,10 @@ class AuthService(
             .orElseThrow { BusinessException("User not found") }
 
         if (jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken.value)) {
-            // Refresh Token의 유효기간이 3일 미만일 경우 전체(Access / Refresh) 재발급
             newToken = jwtTokenProvider.generateJwtToken(userId, user)
-
-            // Refresh Token 저장소 정보 업데이트
             refreshToken.value = newToken.refreshToken.toString()
             refreshTokenRepository.save(refreshToken)
         } else {
-            // Refresh Token의 유효기간이 3일 이상일 경우 Access Token만 재발급
             newToken = jwtTokenProvider.generateJwtAccessToken(userId, user, Date())
         }
 

@@ -38,7 +38,7 @@ class SecurityConfig(
                     .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.REQUEST)
                     .permitAll()
                     .requestMatchers("/login/**").permitAll()
-                    .anyRequest().authenticated()    // 어떠한 요청이라도 인증필요
+                    .anyRequest().authenticated()
 
             }
 
