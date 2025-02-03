@@ -7,8 +7,8 @@ import jakarta.persistence.Id
 @Entity
 class RefreshToken (
     @Id
-    @Column(name = "rt_key", nullable = false)
-    val key: Long,
-    @Column(name = "rt_value", nullable = false)
+    @Column(nullable = false)
+    val userId: Long,
+    @Column(nullable = false)
     var value: String
 ): BaseEntity()
