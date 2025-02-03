@@ -23,9 +23,8 @@ class AuthService(
 
     @Transactional
     fun login(username: String, password: String): JwtToken {
-        val user = userRepository.findByUsername(username) ?: run {
-            throw BusinessException("User with username $username not found")
-        }
+        val user = userRepository.findByUsername(username)
+            ?: throw BusinessException("User with username $username not found")
 
         if (!passwordEncoder.matches(password, user.passwordHash)) {
             throw BusinessException("Password is incorrect")
