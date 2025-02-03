@@ -16,13 +16,15 @@ class JwtTokenFilter(private val jwtTokenProvider: JwtTokenProvider) : OncePerRe
     private val TOKEN_PREFIX = "Bearer "
 
     @Throws(ServletException::class, IOException::class)
-    public override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-        val token = getTokenFromRequest(request)
-
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            val authentication = jwtTokenProvider.getAuthentication(token)
-            SecurityContextHolder.getContext().authentication = authentication
-        }
+    public override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
+        getTokenFromRequest(request)
+            ?.takeIf { jwtTokenProvider.validateToken(it) }
+            ?.let { jwtTokenProvider.getAuthentication(it) }
+            ?.also { SecurityContextHolder.getContext().authentication = it }
 
         filterChain.doFilter(request, response)
     }

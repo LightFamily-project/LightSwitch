@@ -68,13 +68,13 @@ class AuthService(
         val user = userRepository.findById(userId)
             .orElseThrow { BusinessException("User not found") }
 
-        if (jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken.value)) {
-            newToken = jwtTokenProvider.generateJwtToken(userId, user)
-            refreshToken.value = newToken.refreshToken.toString()
-            refreshTokenRepository.save(refreshToken)
-        } else {
-            newToken = jwtTokenProvider.generateJwtAccessToken(userId, user, Date())
-        }
+        return when {
+            jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken.value) -> {
+                jwtTokenProvider.generateJwtToken(userId, user).also {
+                    refreshToken.value = it.refreshToken.toString()
+                    refreshTokenRepository.save(refreshToken)
+                }
+            }
 
             else -> jwtTokenProvider.generateJwtAccessToken(userId, user, Date())
         }
