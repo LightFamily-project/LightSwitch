@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verify
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDateTime
 import java.util.*
@@ -65,13 +67,13 @@ class AuthServiceTest {
         val password = "correctPassword"
         val jwtToken = JwtToken("accessToken", "refreshToken", 1800)
 
-        Mockito.`when`(userRepository.findByUsername(username))
+        `when`(userRepository.findByUsername(username))
             .thenReturn(user)
 
-        Mockito.`when`(passwordEncoder.matches(password, user.passwordHash))
+        `when`(passwordEncoder.matches(password, user.passwordHash))
             .thenReturn(true)
 
-        Mockito.`when`(jwtTokenProvider.generateJwtToken(user.id!!, user))
+        `when`(jwtTokenProvider.generateJwtToken(user.id!!, user))
             .thenReturn(jwtToken)
 
         val result = authService.login(username, password)
@@ -79,6 +81,8 @@ class AuthServiceTest {
         assertNotNull(result)
         assertEquals(jwtToken.accessToken, result.accessToken)
         assertEquals(jwtToken.refreshToken, result.refreshToken)
+        verify(userRepository).save(user)
+        verify(refreshTokenRepository).save(any<RefreshToken>())
     }
 
     @Test
@@ -86,7 +90,7 @@ class AuthServiceTest {
         val username = "invalidUser"
         val password = "somePassword"
 
-        Mockito.`when`(userRepository.findByUsername(username))
+        `when`(userRepository.findByUsername(username))
             .thenReturn(null)
 
         val exception = assertThrows(BusinessException::class.java) {
@@ -100,10 +104,10 @@ class AuthServiceTest {
         val username = "testUser"
         val password = "incorrectPassword"
 
-        Mockito.`when`(userRepository.findByUsername(username))
+        `when`(userRepository.findByUsername(username))
             .thenReturn(user)
 
-        Mockito.`when`(passwordEncoder.matches(password, user.passwordHash))
+        `when`(passwordEncoder.matches(password, user.passwordHash))
             .thenReturn(false)
 
         val exception = assertThrows(BusinessException::class.java) {
@@ -122,19 +126,20 @@ class AuthServiceTest {
             passwordHash = passwordHash
         )
 
-        Mockito.`when`(userRepository.existsByUsername(username))
+        `when`(userRepository.existsByUsername(username))
             .thenReturn(false)
 
-        Mockito.`when`(passwordEncoder.encode(password))
+        `when`(passwordEncoder.encode(password))
             .thenReturn(passwordHash)
 
-        Mockito.`when`(userRepository.save(ArgumentMatchers.any(User::class.java)))
+        `when`(userRepository.save(ArgumentMatchers.any(User::class.java)))
             .thenReturn(newUser)
 
         val result = authService.signup(username, password)
 
         assertNotNull(result)
         assertEquals(username, result.username)
+        verify(userRepository).save(any(User::class.java))
     }
 
     @Test
@@ -142,7 +147,7 @@ class AuthServiceTest {
         val username = "existingUser"
         val password = "somePassword"
 
-        Mockito.`when`(userRepository.existsByUsername(username))
+        `when`(userRepository.existsByUsername(username))
             .thenReturn(true)
 
         val exception = assertThrows(BusinessException::class.java) {
@@ -156,80 +161,77 @@ class AuthServiceTest {
         val userId = 1L
         val token = JwtToken("accessToken", "refreshToken", 1800)
         val newToken = JwtToken("newAccessToken", "newRefreshToken", 1800)
-        val refreshTokenValue = "refreshToken"
 
-        Mockito.`when`(jwtTokenProvider.validateToken(refreshTokenValue))
-            .thenReturn(true)
-
-        Mockito.`when`(jwtTokenProvider.getRefreshTokenSubject(refreshTokenValue))
-            .thenReturn(userId)
-
-        Mockito.`when`(refreshTokenRepository.findById(userId))
+        `when`(refreshTokenRepository.findById(userId))
             .thenReturn(Optional.of(this.refreshToken))
 
-        Mockito.`when`(userRepository.findById(userId))
+        `when`(userRepository.findById(userId))
             .thenReturn(Optional.of(user))
 
-        Mockito.`when`(jwtTokenProvider.isRefreshTokenRenewalRequired(token.refreshToken))
+        `when`(jwtTokenProvider.isRefreshTokenRenewalRequired(token.refreshToken))
             .thenReturn(true)
 
-        Mockito.`when`(jwtTokenProvider.generateJwtToken(userId, user))
+        `when`(jwtTokenProvider.generateJwtToken(userId, user))
             .thenReturn(newToken)
 
-        val result = authService.reissue(token)
+        val result = authService.reissue(token.refreshToken.toString(), userId)
 
         assertNotNull(result)
         assertEquals(newToken.accessToken, result?.accessToken)
         assertEquals(newToken.refreshToken, result?.refreshToken)
     }
 
-    @Test
-    fun `reissue should throw BusinessException if refresh token is invalid`() {
-        val invalidRefreshToken = JwtToken("", "invalidToken", 1800)
-
-        Mockito.`when`(jwtTokenProvider.validateToken(invalidRefreshToken.refreshToken!!))
-            .thenReturn(false)
-
-        val exception = assertThrows(BusinessException::class.java) {
-            authService.reissue(invalidRefreshToken)
-        }
-        assertEquals("Refresh Token is Not Valid", exception.message)
-    }
 
     @Test
     fun `reissue should return new JwtToken if refresh token is valid but no renewal is required`() {
         val userId = 1L
         val token = JwtToken("accessToken", "refreshToken", 1800)
-        val newToken = JwtToken("newAccessToken", null, 1800)
+        val newToken = JwtToken("newAccessToken", "refreshToken", 1800)
 
-        Mockito.`when`(jwtTokenProvider.validateToken(token.refreshToken!!))
+        `when`(jwtTokenProvider.validateToken(token.refreshToken!!))
             .thenReturn(true)
 
-        Mockito.`when`(jwtTokenProvider.getRefreshTokenSubject(token.refreshToken!!))
+        `when`(jwtTokenProvider.getRefreshTokenSubject(token.refreshToken!!))
             .thenReturn(userId)
 
-        Mockito.`when`(refreshTokenRepository.findById(userId))
+        `when`(refreshTokenRepository.findById(userId))
             .thenReturn(Optional.of(this.refreshToken))
 
-        Mockito.`when`(userRepository.findById(userId))
+        `when`(userRepository.findById(userId))
             .thenReturn(Optional.of(user))
 
-        Mockito.`when`(jwtTokenProvider.isRefreshTokenRenewalRequired(token.refreshToken))
+        `when`(jwtTokenProvider.isRefreshTokenRenewalRequired(token.refreshToken))
             .thenReturn(false)
 
-        Mockito.`when`(
+        `when`(
             jwtTokenProvider.generateJwtAccessToken(
                 eq(userId),
                 eq(user),
-                any()
+                any(),
+                eq(
+                    token.refreshToken.toString()
+                )
             )
-        )
-            .thenReturn(newToken)
+        ).thenReturn(newToken)
 
-        val result = authService.reissue(token)
+        val result = authService.reissue(token.refreshToken.toString(), userId)
 
         assertNotNull(result)
         assertEquals(newToken.accessToken, result?.accessToken)
-        assertNull(result?.refreshToken)
+    }
+
+    @Test
+    fun `logout success test`() {
+        val accessToken = "validToken"
+        val authentication = mock(Authentication::class.java)
+        `when`(jwtTokenProvider.getAuthentication(accessToken)).thenReturn(authentication)
+        `when`(authentication.name).thenReturn("1")
+
+        authService.logout(1L)
+
+        verify(
+            refreshTokenRepository,
+            times(1)
+        ).deleteById(1L)
     }
 }

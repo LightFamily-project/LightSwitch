@@ -81,11 +81,11 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey))
     }
 
-    fun generateJwtAccessToken(userId: Long, user: User, now: Date): JwtToken {
+    fun generateJwtAccessToken(userId: Long, user: User, now: Date, refreshToken: String): JwtToken {
         val accessToken = createAccessToken(userId, user, now)
         return JwtToken(
             accessToken = accessToken,
-            refreshToken = null,
+            refreshToken = refreshToken,
             accessTokenExpiredDate = accessValidTime
         )
     }
@@ -149,7 +149,7 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         val now = (Date()).time
         val refreshExpiredTime = claimsJws.body.expiration.time
 
-        return refreshExpiredTime - now > threeDays
+        return refreshExpiredTime - now <= threeDays
     }
 
 }
