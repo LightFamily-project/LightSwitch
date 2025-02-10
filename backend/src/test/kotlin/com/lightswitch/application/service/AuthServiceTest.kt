@@ -1,13 +1,12 @@
-package com.lightswitch.infrastructue.security
+package com.lightswitch.application.service
 
 import com.lightswitch.presentation.exception.BusinessException
 import com.lightswitch.infrastructure.database.entity.RefreshToken
 import com.lightswitch.infrastructure.database.entity.User
 import com.lightswitch.infrastructure.database.repository.RefreshTokenRepository
 import com.lightswitch.infrastructure.database.repository.UserRepository
-import com.lightswitch.infrastructure.security.AuthService
-import com.lightswitch.infrastructure.security.jwt.JwtToken
-import com.lightswitch.infrastructure.security.jwt.JwtTokenProvider
+import com.lightswitch.infrastructure.security.JwtToken
+import com.lightswitch.infrastructure.security.JwtTokenProvider
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

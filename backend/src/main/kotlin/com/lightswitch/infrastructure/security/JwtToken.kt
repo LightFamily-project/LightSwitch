@@ -1,4 +1,4 @@
-package com.lightswitch.infrastructure.security.jwt
+package com.lightswitch.infrastructure.security
 
 data class JwtToken(
     val accessToken: String? = null,

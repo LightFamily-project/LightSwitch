@@ -1,7 +1,7 @@
-package com.lightswitch.infrastructue.security.jwt
+package com.lightswitch.infrastructue.security
 
 import com.lightswitch.infrastructure.database.entity.User
-import com.lightswitch.infrastructure.security.jwt.JwtTokenProvider
+import com.lightswitch.infrastructure.security.JwtTokenProvider
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders

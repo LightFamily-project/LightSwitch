@@ -1,4 +1,4 @@
-package com.lightswitch.infrastructure.security.jwt
+package com.lightswitch.infrastructure.security
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
