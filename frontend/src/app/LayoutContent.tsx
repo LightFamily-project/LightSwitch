@@ -53,7 +53,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-background text-foreground">
+      <div className="flex h-screen w-full bg-background text-foreground">
         <Sidebar collapsible="icon">
           <SidebarHeader className="flex h-12 w-full flex-row items-center gap-0">
             <Image
