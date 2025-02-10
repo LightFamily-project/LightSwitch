@@ -1,12 +1,12 @@
-package com.lightswitch.security
+package com.lightswitch.infrastructure.security
 
-import com.lightswitch.exception.BusinessException
+import com.lightswitch.presentation.exception.BusinessException
 import com.lightswitch.infrastructure.database.entity.RefreshToken
 import com.lightswitch.infrastructure.database.entity.User
 import com.lightswitch.infrastructure.database.repository.RefreshTokenRepository
 import com.lightswitch.infrastructure.database.repository.UserRepository
-import com.lightswitch.security.jwt.JwtToken
-import com.lightswitch.security.jwt.JwtTokenProvider
+import com.lightswitch.infrastructure.security.jwt.JwtToken
+import com.lightswitch.infrastructure.security.jwt.JwtTokenProvider
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -63,7 +63,6 @@ class AuthService(
             throw BusinessException("Refresh Token is Not Valid")
         }
 
-        val newToken: JwtToken?
         val user = userRepository.findById(userId)
             .orElseThrow { BusinessException("User not found") }
 

@@ -1,7 +1,7 @@
-package com.lightswitch.security.config
+package com.lightswitch.infrastructure.security.config
 
-import com.lightswitch.security.jwt.JwtTokenFilter
-import com.lightswitch.security.jwt.JwtTokenProvider
+import com.lightswitch.infrastructure.security.jwt.JwtTokenFilter
+import com.lightswitch.infrastructure.security.jwt.JwtTokenProvider
 import jakarta.servlet.DispatcherType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
