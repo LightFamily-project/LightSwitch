@@ -1,9 +1,8 @@
 package com.lightswitch.controller
 
-import com.lightswitch.controller.request.UserAccount
-import com.lightswitch.exception.BusinessException
-import com.lightswitch.security.AuthService
-import com.lightswitch.security.jwt.JwtToken
+import com.lightswitch.application.service.AuthService
+import com.lightswitch.infrastructure.security.JwtToken
+import com.lightswitch.presentation.exception.BusinessException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
