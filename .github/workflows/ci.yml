@@ -26,24 +26,20 @@ jobs:
           version: "9.15.4"
 
       - name: Install dependencies
-        run: |
-          cd frontend
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
 
       - name: Run lint
-        run: |
-          cd frontend
-          pnpm lint
+        run: pnpm lint
+        working-directory: frontend
 
       - name: Check ts
-        run: |
-          cd frontend
-          pnpm tsc
+        run: pnpm tsc
+        working-directory: frontend
 
       - name: Build Frontend
-        run: |
-          cd frontend
-          pnpm build
+        run: pnpm build
+        working-directory: frontend
 
   backend:
     runs-on: ubuntu-latest
@@ -66,9 +62,9 @@ jobs:
 
       - name: Build and test Backend
         run: |
-          cd backend
           chmod +x gradlew
           ./gradlew build --no-daemon
+        working-directory: backend
 
   java-sdk:
     runs-on: ubuntu-latest
@@ -84,6 +80,6 @@ jobs:
 
       - name: Build and test Java SDK
         run: |
-          cd sdk/java-sdk
           chmod +x gradlew
           ./gradlew build --no-daemon
+        working-directory: sdk/java-sdk
