@@ -1,12 +1,12 @@
-package com.lightswitch.security
+package com.lightswitch.application.service
 
-import com.lightswitch.exception.BusinessException
+import com.lightswitch.presentation.exception.BusinessException
 import com.lightswitch.infrastructure.database.entity.RefreshToken
 import com.lightswitch.infrastructure.database.entity.User
 import com.lightswitch.infrastructure.database.repository.RefreshTokenRepository
 import com.lightswitch.infrastructure.database.repository.UserRepository
-import com.lightswitch.security.jwt.JwtToken
-import com.lightswitch.security.jwt.JwtTokenProvider
+import com.lightswitch.infrastructure.security.JwtToken
+import com.lightswitch.infrastructure.security.JwtTokenProvider
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

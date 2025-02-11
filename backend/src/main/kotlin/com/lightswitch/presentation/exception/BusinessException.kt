@@ -1,4 +1,4 @@
-package com.lightswitch.exception
+package com.lightswitch.presentation.exception
 
 class BusinessException(message: String) : RuntimeException(message) {
 }

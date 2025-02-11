@@ -1,4 +1,4 @@
-package com.lightswitch.security.jwt
+package com.lightswitch.infrastructure.security
 
 import com.lightswitch.infrastructure.database.entity.User
 import io.jsonwebtoken.*
