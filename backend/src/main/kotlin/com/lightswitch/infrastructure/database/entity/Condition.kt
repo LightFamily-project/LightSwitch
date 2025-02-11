@@ -20,5 +20,6 @@ class Condition(
     @Column(nullable = false)
     var key: String,
     @Column(nullable = false)
-    var value: String, // TODO: Implement AttributeConverter for json
+    var value: String,
+    // TODO: Implement AttributeConverter for json
 ) : BaseEntity()
