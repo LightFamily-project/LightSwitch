@@ -18,14 +18,16 @@ import javax.crypto.SecretKey
 class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
 
     private val logger: Logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
-    private val TYPE = "tokenType"
-    private val USER = "user"
-    private val accessValidTime = 30 * 60 * 1000L // 30 minutes
-    private val refreshValidTime = 7 * 24 * 60 * 60 * 1000L // 7 days
-    private val threeDays = 3 * 24 * 60 * 60 * 1000L // 3 days
+
+    companion object {
+        const val TYPE = "tokenType"
+        const val USER = "user"
+        const val ACCESS_VALID_TIME = 30 * 60 * 1000L // 30 minutes
+        const val REFRESH_VALID_TIME = 7 * 24 * 60 * 60 * 1000L // 7 days
+        const val THREE_DAYS = 3 * 24 * 60 * 60 * 1000L // 3 days
+    }
 
     fun generateJwtToken(userId: Long, user: User): JwtToken {
-
         val now = Date()
         val accessToken = createAccessToken(userId, user, now)
 
@@ -35,14 +37,14 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         val refreshToken = Jwts.builder()
             .setClaims(refreshTokenClaims)
             .setIssuedAt(now)
-            .setExpiration(Date(now.time + refreshValidTime))
+            .setExpiration(Date(now.time + REFRESH_VALID_TIME))
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact()
 
         return JwtToken(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            accessTokenExpiredDate = accessValidTime
+            accessTokenExpiredDate = ACCESS_VALID_TIME
         )
     }
 
@@ -59,7 +61,7 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         val accessToken = Jwts.builder()
             .setClaims(accessTokenClaims)
             .setIssuedAt(now)
-            .setExpiration(Date(now.time + accessValidTime))
+            .setExpiration(Date(now.time + ACCESS_VALID_TIME))
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact()
         return accessToken
@@ -86,7 +88,7 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         return JwtToken(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            accessTokenExpiredDate = accessValidTime
+            accessTokenExpiredDate = ACCESS_VALID_TIME
         )
     }
 
@@ -149,7 +151,7 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         val now = (Date()).time
         val refreshExpiredTime = claimsJws.body.expiration.time
 
-        return refreshExpiredTime - now <= threeDays
+        return refreshExpiredTime - now <= THREE_DAYS
     }
 
 }
