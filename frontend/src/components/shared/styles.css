@@ -1,0 +1,15 @@
+@keyframes slider {
+  0% {
+    width: 0px;
+    opacity: 0;
+    transform: translateX(400px);
+  }
+  100% {
+    width: 400px;
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+.slider-horizontal {
+  animation: 0.8s slider;
+}

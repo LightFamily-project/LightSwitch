@@ -126,6 +126,11 @@ export default function Home() {
     setData(ExampleData);
   }
 
+  const handleSheetClose = () => {
+    setIsOpen(!isOpen);
+    form.reset();
+  };
+
   return (
     <div className="flex h-full flex-col gap-2 p-6">
       <header className="flex w-[270px] flex-row items-center justify-between">
@@ -134,6 +139,13 @@ export default function Home() {
           Feature Flag Management
         </span>
       </header>
+      <div id="sideBar"></div>
+      {isOpen && (
+        <div
+          className="absolute right-0 top-0 z-[49] size-full bg-[rgba(0,0,0,0.7)]"
+          onClick={handleSheetClose}
+        ></div>
+      )}
       <HomeContext.Provider
         value={{
           columnFilters,
@@ -152,6 +164,7 @@ export default function Home() {
           variationsState,
           setVariationsState,
           handleVariations,
+          handleSheetClose,
         }}
       >
         <MainContent />

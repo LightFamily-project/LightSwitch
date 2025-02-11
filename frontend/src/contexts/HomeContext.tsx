@@ -25,6 +25,7 @@ export interface homeContextType {
     sort: string,
     index: number,
   ): void;
+  handleSheetClose: () => void;
 }
 
 export const HomeContext = createContext<homeContextType | null>(null);

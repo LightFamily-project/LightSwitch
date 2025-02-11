@@ -1,29 +1,24 @@
-import { Lock, Plus, RefreshCcw } from 'lucide-react';
-import { FormProvider } from 'react-hook-form';
-import { useContext, useEffect } from 'react';
+import { Lock, Plus, RefreshCcw, X } from 'lucide-react';
+import { useContext } from 'react';
 import { useTheme } from 'next-themes';
+import { FormProvider } from 'react-hook-form';
 
+import { Button } from '../ui/button';
+import SideBar from '../shared/sideBar';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '../ui/sheet';
-import { Input } from '../ui/input';
 import { DataTable } from '../ui/dataTable';
+import { Input } from '../ui/input';
 
 import KeyInputSection from './mainContent/keyInputSection';
+import SelectSection from './mainContent/selectSection';
 import EnabledInputSection from './mainContent/enabledInputSection';
 import DefaultValueInputSection from './mainContent/defaultValueInputSection';
 import VariationsSection from './mainContent/variationsSection';
 import CreateBtnSection from './mainContent/createBtnSection';
-import SelectSection from './mainContent/selectSection';
 
-import { columns } from '@/constants/columns';
-import { TableDataType } from '@/types/home';
 import { HomeContext, homeContextType } from '@/contexts/HomeContext';
+import { TableDataType } from '@/types/home';
+import { columns } from '@/constants/columns';
 
 export default function MainContent() {
   const context = useContext<homeContextType | null>(HomeContext);
@@ -34,23 +29,15 @@ export default function MainContent() {
     inputData,
     fillData,
     isOpen,
-    setIsOpen,
     form,
     submit,
     data,
     setData,
+    handleSheetClose,
   } = context as homeContextType;
 
   const { theme } = useTheme();
 
-  useEffect(() => {
-    console.log('theme: ', theme);
-  }, [theme]);
-
-  const handleSheetClose = () => {
-    setIsOpen(!isOpen); // 시트 닫기
-    form.reset(); // 폼 초기화
-  };
   return (
     <main className="flex flex-col justify-between gap-2">
       <div className="flex w-full flex-row justify-end">
@@ -67,7 +54,68 @@ export default function MainContent() {
             onChange={(e) => inputData(e.target.value)}
             onBlur={fillData}
           />
-          <Sheet open={isOpen} onOpenChange={handleSheetClose}>
+          {/* sideBar */}
+          {theme === 'dark' ? (
+            <Button
+              className="flex h-[36px] w-[230px] flex-row items-center justify-between rounded-[0.6rem] border border-input bg-transparent p-2 text-[0.9rem] text-white hover:border-2 hover:bg-input hover:text-white"
+              onClick={handleSheetClose}
+            >
+              <Plus width={18} />
+              New feature flag
+              <Lock width={18} />
+            </Button>
+          ) : (
+            <Button
+              className="flex h-[36px] w-[230px] flex-row items-center justify-between rounded-[0.6rem] border border-input bg-white p-2 text-[0.9rem] text-black hover:border-2 hover:border-input hover:bg-input hover:text-black"
+              onClick={handleSheetClose}
+            >
+              <Plus width={18} />
+              New feature flag
+              <Lock width={18} />
+            </Button>
+          )}
+
+          {isOpen && (
+            <SideBar>
+              <div className="flex min-h-full flex-col bg-white p-5">
+                <header className="mb-2 flex w-full flex-row items-center justify-between">
+                  <span className="text-[1.3rem]">Add New Feature Flag</span>
+                  <X
+                    className="size-[25px] cursor-pointer rounded-[50%] border-2 border-white p-1 hover:border-2 hover:border-[#3b84e3]"
+                    onClick={handleSheetClose}
+                  />
+                </header>
+                <main>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>New Feature Flag Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="overflow-y-auto">
+                      <FormProvider {...form}>
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            submit();
+                          }}
+                        >
+                          <div className="mb-4 flex flex-col gap-3">
+                            <KeyInputSection />
+                            <SelectSection />
+                            <EnabledInputSection />
+                            <DefaultValueInputSection />
+                          </div>
+                          <VariationsSection />
+                          <CreateBtnSection />
+                        </form>
+                      </FormProvider>
+                    </CardContent>
+                  </Card>
+                </main>
+              </div>
+            </SideBar>
+          )}
+
+          {/* <Sheet open={isOpen} onOpenChange={handleSheetClose}>
             {theme === 'dark' ? (
               <SheetTrigger className="flex h-[36px] w-[230px] flex-row items-center justify-between rounded-[0.6rem] border border-input bg-transparent p-2 text-[0.9rem] text-white hover:border-2 hover:bg-input hover:text-white">
                 <Plus width={18} />
@@ -114,7 +162,7 @@ export default function MainContent() {
                 </CardContent>
               </Card>
             </SheetContent>
-          </Sheet>
+          </Sheet> */}
         </div>
       </div>
 
