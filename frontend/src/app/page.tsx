@@ -68,17 +68,14 @@ export default function Home() {
       .getValues('variations')
       .filter((_d, i) => index !== i);
 
-    // variations 상태 업데이트
     form.setValue('variations', newVariations);
     setVariationsState(newVariations);
   };
 
   // Variation 생성
   const addVariation = () => {
-    // state 추가
     setVariationsState((prev) => [...prev, { key: '', value: '' }]);
 
-    // form 로직
     const newType = form.getValues('type');
     const newVariation = {
       key: '',
@@ -122,13 +119,35 @@ export default function Home() {
     setIsOpen(false);
   };
 
+  // 데이터 초기화
   function fillData() {
     setData(ExampleData);
   }
 
+  // 사이드바 열고 닫기
   const handleSheetClose = () => {
     setIsOpen(!isOpen);
     form.reset();
+  };
+
+  const context = {
+    columnFilters,
+    initData,
+    inputData,
+    fillData,
+    isOpen,
+    setIsOpen,
+    form,
+    submit,
+    removeVariation,
+    addVariation,
+    handleCreateFeatureFlag,
+    data,
+    setData,
+    variationsState,
+    setVariationsState,
+    handleVariations,
+    handleSheetClose,
   };
 
   return (
@@ -146,27 +165,7 @@ export default function Home() {
           onClick={handleSheetClose}
         ></div>
       )}
-      <HomeContext.Provider
-        value={{
-          columnFilters,
-          initData,
-          inputData,
-          fillData,
-          isOpen,
-          setIsOpen,
-          form,
-          submit,
-          removeVariation,
-          addVariation,
-          handleCreateFeatureFlag,
-          data,
-          setData,
-          variationsState,
-          setVariationsState,
-          handleVariations,
-          handleSheetClose,
-        }}
-      >
+      <HomeContext.Provider value={context}>
         <MainContent />
       </HomeContext.Provider>
     </div>
