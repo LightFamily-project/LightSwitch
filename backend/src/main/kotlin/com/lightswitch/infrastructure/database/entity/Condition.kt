@@ -1,6 +1,8 @@
 package com.lightswitch.infrastructure.database.entity
 
+import com.lightswitch.infrastructure.database.converter.JsonConverter
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -19,7 +21,7 @@ class Condition(
     var flag: FeatureFlag,
     @Column(nullable = false)
     var key: String,
-    @Column(nullable = false)
-    var value: String,
-    // TODO: Implement AttributeConverter for json
+    @Convert(converter = JsonConverter::class)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    var value: Any,
 ) : BaseEntity()
