@@ -1,7 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
+
+import { PATHS } from '@/constants/paths';
 
 type User = {
   id: string;
@@ -27,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [requiresSetup, setRequiresSetup] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -73,11 +77,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser({ id: tempRandomId });
   };
 
-  // TODO: Update routing management
-  // useEffect(() => {
-  //   if (requiresSetup) router.replace(PATHS.SETUP);
-  //   if (!user) router.replace(PATHS.LOGIN);
-  // }, [requiresSetup, router, user]);
+  useEffect(() => {
+    if (requiresSetup) router.replace(PATHS.SETUP);
+    if (!user) router.replace(PATHS.LOGIN);
+  }, [requiresSetup, router, user]);
 
   return (
     <AuthContext.Provider
