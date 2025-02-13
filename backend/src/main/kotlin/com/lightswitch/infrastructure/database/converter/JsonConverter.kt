@@ -6,13 +6,15 @@ import jakarta.persistence.Converter
 
 @Converter
 class JsonConverter : AttributeConverter<Any, String> {
-    private val objectMapper = jacksonObjectMapper()
-
     override fun convertToDatabaseColumn(attribute: Any?): String {
         return objectMapper.writeValueAsString(attribute)
     }
 
     override fun convertToEntityAttribute(dbData: String?): Any? {
         return dbData?.let { objectMapper.readValue(it, Any::class.java) }
+    }
+
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
     }
 }
