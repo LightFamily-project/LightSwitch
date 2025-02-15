@@ -60,6 +60,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.12")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
