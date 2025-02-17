@@ -39,6 +39,97 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
     }
 
     @Test
+    fun `getFlags should return all feature flags`() {
+        val user = userRepository.save(
+            User(
+                username = "test-user",
+                passwordHash = "passwordHash",
+                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+            )
+        )
+        val flag1 = featureFlagRepository.save(
+            FeatureFlag(
+                name = "feature-1",
+                description = "Feature Flag 1",
+                type = "boolean",
+                enabled = true,
+                createdBy = user,
+                updatedBy = user
+            )
+        )
+        val flag2 = featureFlagRepository.save(
+            FeatureFlag(
+                name = "feature-2",
+                description = "Feature Flag 2",
+                type = "number",
+                enabled = false,
+                createdBy = user,
+                updatedBy = user
+            )
+        )
+        val flag3 = featureFlagRepository.save(
+            FeatureFlag(
+                name = "feature-3",
+                description = "Feature Flag 3",
+                type = "string",
+                enabled = true,
+                createdBy = user,
+                updatedBy = user
+            )
+        )
+        flag1.defaultCondition = Condition(flag = flag1, key = "boolean", value = true)
+        flag2.defaultCondition = Condition(flag = flag2, key = "number", value = 10)
+        flag3.defaultCondition = Condition(flag = flag3, key = "string", value = "value")
+
+        val flags = featureFlagService.getFlags()
+
+        assertThat(flags).hasSize(3)
+        assertThat(flags)
+            .extracting("name", "description", "type", "enabled", "createdBy", "updatedBy")
+            .containsExactly(
+                tuple("feature-1", "Feature Flag 1", "boolean", true, user, user),
+                tuple("feature-2", "Feature Flag 2", "number", false, user, user),
+                tuple("feature-3", "Feature Flag 3", "string", true, user, user),
+            )
+        assertThat(flags)
+            .extracting("defaultCondition.key", "defaultCondition.value")
+            .containsExactlyInAnyOrder(
+                tuple("boolean", true),
+                tuple("number", 10),
+                tuple("string", "value"),
+            )
+    }
+
+    @Test
+    fun `getFlags should return empty list when feature flag not exists`() {
+        assertThat(featureFlagService.getFlags()).isEmpty()
+    }
+
+    @Test
+    fun `getFlags should return empty list when all feature flags are deleted`() {
+        val user = userRepository.save(
+            User(
+                username = "test-user",
+                passwordHash = "passwordHash",
+                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+            ),
+        )
+        val flag = FeatureFlag(
+            name = "user-limit",
+            description = "User Limit Flag",
+            type = "number",
+            enabled = true,
+            createdBy = user,
+            updatedBy = user,
+        ).apply {
+            this.deletedAt = Instant.now()
+        }
+        featureFlagRepository.save(flag)
+
+        assertThat(featureFlagService.getFlags()).isEmpty()
+    }
+
+    @Test
     fun `getFlagOrThrow should return feature flag when key exists`() {
         val user = userRepository.save(
             User(
