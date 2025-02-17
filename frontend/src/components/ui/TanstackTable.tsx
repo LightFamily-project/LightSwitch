@@ -1,17 +1,14 @@
 'use client';
 import {
   ColumnDef,
-  SortingState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
   getSortedRowModel,
-  Row,
   PaginationState,
 } from '@tanstack/react-table';
-import { SetStateAction, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 import {
   Table,
@@ -22,19 +19,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { TableDataType } from '@/types/home';
+import { featureFlagTableType } from '@/types/types';
 
-export interface DataTableProps<TData extends TableDataType, TValue> {
+export interface DataTableProps<TData extends featureFlagTableType, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData extends TableDataType, TValue>({
+export function DataTable<TData extends featureFlagTableType, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 9,
@@ -45,35 +40,12 @@ export function DataTable<TData extends TableDataType, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
-      rowSelection,
-      sorting,
       pagination,
     },
-    onPaginationChange: (updater) => {
-      setPagination((prev) => ({
-        ...prev,
-        ...updater,
-      }));
-    },
+    onPaginationChange: setPagination,
   });
-
-  const handlePreviousPage = () => {
-    setPagination((prev) => ({
-      ...prev,
-      pageIndex: Math.max(prev.pageIndex - 1, 0),
-    }));
-  };
-
-  const handleNextPage = () => {
-    setPagination((prev) => ({
-      ...prev,
-      pageIndex: prev.pageIndex + 1,
-    }));
-  };
 
   return (
     <div className="flex w-[95%] flex-col items-center">
@@ -128,17 +100,16 @@ export function DataTable<TData extends TableDataType, TValue>({
         </Table>
       </div>
       <div className="flex w-full items-center justify-between space-x-2 py-4">
-        {table.getFilteredSelectedRowModel().rows.length} of{' '}
-        {table.getFilteredRowModel().rows.length} row(s) selected
-        <div className="flex w-[220px] flex-row items-center justify-between">
-          <span className="text-[0.8rem]">
-            Page {pagination.pageIndex + 1} of {table.getPageCount()}
+        {`${table.getFilteredSelectedRowModel().rows.length} of ${table.getFilteredRowModel().rows.length} row(s) selected`}
+        <div className="flex items-center justify-between">
+          <span className="text-sm">
+            {`Page ${pagination.pageIndex + 1} of ${table.getPageCount()}`}
           </span>
-          <div className="flex w-[135px] flex-row items-center justify-between">
+          <div className="flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
-              onClick={handlePreviousPage}
+              onClick={() => table.previousPage()}
               disabled={pagination.pageIndex === 0}
             >
               Previous
@@ -146,7 +117,7 @@ export function DataTable<TData extends TableDataType, TValue>({
             <Button
               variant="outline"
               size="sm"
-              onClick={handleNextPage}
+              onClick={() => table.nextPage()}
               disabled={pagination.pageIndex >= table.getPageCount() - 1}
             >
               Next
