@@ -49,10 +49,16 @@ class FeatureFlagController(
     fun getFlag(
         @PathVariable key: String,
     ): PayloadResponse<FeatureFlagResponse> {
-        return PayloadResponse<FeatureFlagResponse>(
-            status = "status",
-            message = "message",
-            data = null
+        // TODO: Improve the way finding the authenticated user.
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+        val user = userRepository.findByIdOrNull(userId.toLong()) ?: throw BusinessException("User not found")
+
+        val flag = featureFlagService.getFlagOrThrow(key)
+
+        return PayloadResponse.success(
+            message = "Fetched a flag successfully",
+            data = FeatureFlagResponse.from(flag)
         )
     }
 
