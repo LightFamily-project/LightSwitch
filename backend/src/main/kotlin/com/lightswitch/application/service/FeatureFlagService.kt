@@ -15,6 +15,10 @@ class FeatureFlagService(
     private val conditionRepository: ConditionRepository,
     private val featureFlagRepository: FeatureFlagRepository,
 ) {
+    fun getFlagOrThrow(key: String): FeatureFlag {
+        return featureFlagRepository.findByName(key) ?: throw BusinessException("Feature flag $key does not exist")
+    }
+
     @Transactional
     fun create(
         user: User,
