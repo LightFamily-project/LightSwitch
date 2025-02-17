@@ -35,10 +35,11 @@ class FeatureFlagController(
     )
     @GetMapping
     fun getFlags(): PayloadResponse<List<FeatureFlagResponse>> {
-        return PayloadResponse<List<FeatureFlagResponse>>(
-            status = "status",
-            message = "message",
-            data = listOf()
+        val flags = featureFlagService.getFlags()
+
+        return PayloadResponse.success(
+            message = "Fetched all feature flags successfully",
+            data = flags.map { FeatureFlagResponse.from(it) },
         )
     }
 
@@ -49,11 +50,6 @@ class FeatureFlagController(
     fun getFlag(
         @PathVariable key: String,
     ): PayloadResponse<FeatureFlagResponse> {
-        // TODO: Improve the way finding the authenticated user.
-        val authentication = SecurityContextHolder.getContext().authentication
-        val userId = authentication.name
-        val user = userRepository.findByIdOrNull(userId.toLong()) ?: throw BusinessException("User not found")
-
         val flag = featureFlagService.getFlagOrThrow(key)
 
         return PayloadResponse.success(
