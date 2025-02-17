@@ -12,16 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type FeatureFlag = {
-  id: string;
-  key: string;
-  createdAt: string;
-  createdBy: string;
-  enabled: boolean;
-  type: 'Bool' | 'Number' | 'String';
-  variations: { key: string; value: boolean | number | string }[];
-  defaultValue: boolean | number | string;
-};
+import { FeatureFlag } from '@/types/featureFlag';
 
 type FeatureFlagDetailsProps = {
   featureFlag: FeatureFlag;

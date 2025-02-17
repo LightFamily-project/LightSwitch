@@ -6,16 +6,18 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FeatureFlagDetails } from '@/components/FeatureFlagDetails';
 import { VariationsTable } from '@/components/VariationsTable';
-import { FeatureFlag, mockFeatureFlags } from '@/data/mock-data';
+import { mockFeatureFlags } from '@/data/mock-data';
+import { FeatureFlag } from '@/types/featureFlag';
 
 export default function FeatureFlagSettings() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const originalFeatureFlag = mockFeatureFlags.find((flag) => flag.id === id);
-  const [featureFlag, setFeatureFlag] = useState<FeatureFlag | undefined>(
-    originalFeatureFlag ? { ...originalFeatureFlag } : undefined,
+  const targetFeatureFlag =
+    mockFeatureFlags.find((flag) => flag.id === id) ?? null;
+  const [featureFlag, setFeatureFlag] = useState<FeatureFlag | null>(
+    targetFeatureFlag ?? null,
   );
   const [isEditing, setIsEditing] = useState(false);
 
@@ -29,9 +31,7 @@ export default function FeatureFlagSettings() {
   };
 
   const handleCancel = () => {
-    setFeatureFlag(
-      originalFeatureFlag ? { ...originalFeatureFlag } : undefined,
-    );
+    setFeatureFlag(targetFeatureFlag);
     setIsEditing(false);
   };
 

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { FeatureFlag } from '@/data/mock-data';
+import { FeatureFlag } from '@/types/featureFlag';
 
 interface VariationsTableProps {
   featureFlag: FeatureFlag;
@@ -26,7 +26,6 @@ export function VariationsTable({
   isEditing,
   setFeatureFlag,
 }: VariationsTableProps) {
-  // Variations Change
   const handleVariationChange = (
     index: number,
     key: keyof FeatureFlag['variations'][0],
@@ -37,7 +36,6 @@ export function VariationsTable({
     setFeatureFlag({ ...featureFlag, variations: newVariations });
   };
 
-  // Variation Add
   const handleAddVariation = () => {
     const newVariation = {
       key: '',
@@ -54,10 +52,11 @@ export function VariationsTable({
     });
   };
 
-  // Variation Delete
   const handleDeleteVariation = (index: number) => {
-    const newVariations = featureFlag.variations.filter((_, i) => i !== index);
-    setFeatureFlag({ ...featureFlag, variations: newVariations });
+    const updateVariations = featureFlag.variations.filter(
+      (_, i) => i !== index,
+    );
+    setFeatureFlag({ ...featureFlag, variations: updateVariations });
   };
 
   return (
@@ -113,7 +112,6 @@ export function VariationsTable({
           </TableBody>
         </Table>
 
-        {/* Add Variation Btn */}
         {isEditing && (
           <Button
             variant="outline"
