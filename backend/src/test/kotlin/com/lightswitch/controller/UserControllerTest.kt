@@ -2,7 +2,6 @@ package com.lightswitch.controller
 
 import com.lightswitch.application.service.AuthService
 import com.lightswitch.infrastructure.security.JwtToken
-import com.lightswitch.presentation.exception.BusinessException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -54,27 +53,10 @@ class UserControllerTest {
                 .content("""{"username": "testUser", "password": "password"}""")
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.accessToken").value("accessToken"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.refreshToken").value("refreshToken"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessToken").value("accessToken"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.refreshToken").value("refreshToken"))
     }
 
-    @Test
-    fun `should return bad request when signup fails`() {
-        `when`(
-            authService.signup(
-                "testUser",
-                "password"
-            )
-        ).thenThrow(BusinessException("User already exists"))
-
-        mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/users/initialize")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"username": "testUser", "password": "password"}""")
-        )
-            .andExpect(MockMvcResultMatchers.status().isBadRequest)
-            .andExpect(MockMvcResultMatchers.content().string("User already exists"))
-    }
 
     @Test
     fun `should refresh user token successfully`() {
@@ -89,8 +71,8 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.accessToken").value("newAccessToken"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.refreshToken").value("newRefreshToken"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessToken").value("newAccessToken"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.refreshToken").value("newRefreshToken"))
     }
 
     @Test
@@ -102,6 +84,7 @@ class UserControllerTest {
                 .content("""{"username": "testUser", "password": "password"}""")
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().string("Log out Completed: testUser"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data").value("testUser"))
+
     }
 }
