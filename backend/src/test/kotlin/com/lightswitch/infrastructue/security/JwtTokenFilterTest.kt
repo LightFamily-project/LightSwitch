@@ -5,6 +5,7 @@ import com.lightswitch.infrastructure.security.JwtTokenProvider
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
@@ -47,7 +48,7 @@ class JwtTokenFilterTest {
         jwtTokenFilter.doFilterInternal(request, response, filterChain)
 
         val context: SecurityContext = SecurityContextHolder.getContext()
-        assert(context.authentication == authentication)
+        assertThat(context.authentication == authentication)
         Mockito.verify(filterChain).doFilter(request, response)
     }
 
@@ -60,7 +61,7 @@ class JwtTokenFilterTest {
         jwtTokenFilter.doFilterInternal(request, response, filterChain)
 
         val context: SecurityContext = SecurityContextHolder.getContext()
-        assert(context.authentication == null)
+        assertThat(context.authentication == null)
         Mockito.verify(filterChain).doFilter(request, response)
     }
 
@@ -71,7 +72,7 @@ class JwtTokenFilterTest {
         jwtTokenFilter.doFilterInternal(request, response, filterChain)
 
         val context: SecurityContext = SecurityContextHolder.getContext()
-        assert(context.authentication == null)
+        assertThat(context.authentication == null)
         Mockito.verify(filterChain).doFilter(request, response)
     }
 }

@@ -32,7 +32,10 @@ class AuthService(
 
         user.lastLoginAt = LocalDateTime.now()
         userRepository.save(user)
-        return jwtTokenProvider.generateJwtToken(user.id!!, user)
+        val jwtToken = jwtTokenProvider.generateJwtToken(user.id!!, user)
+        refreshTokenRepository.save(RefreshToken(user.id!!, jwtToken.refreshToken!!))
+
+        return jwtToken
     }
 
     @Transactional
@@ -50,16 +53,11 @@ class AuthService(
     }
 
     @Transactional
-    fun reissue(jwtToken: JwtToken): JwtToken? {
-        if (!jwtTokenProvider.validateToken(jwtToken.refreshToken!!)) {
-            throw BusinessException("Refresh Token is Not Valid")
-        }
-
-        val userId: Long = jwtTokenProvider.getRefreshTokenSubject(jwtToken.refreshToken)
+    fun reissue(jwtToken: String, userId: Long): JwtToken? {
         val refreshToken: RefreshToken = refreshTokenRepository.findById(userId)
             .orElseThrow { BusinessException("Log-out user") }
 
-        if (refreshToken.value != jwtToken.refreshToken) {
+        if (refreshToken.value != jwtToken) {
             throw BusinessException("Refresh Token is Not Valid")
         }
 
@@ -70,11 +68,16 @@ class AuthService(
             jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken.value) -> {
                 jwtTokenProvider.generateJwtToken(userId, user).also {
                     refreshToken.value = it.refreshToken.toString()
-                    refreshTokenRepository.save(refreshToken)
                 }
             }
-
-            else -> jwtTokenProvider.generateJwtAccessToken(userId, user, Date())
+            else -> {
+                jwtTokenProvider.generateJwtAccessToken(userId, user, Date(), refreshToken.value)
+            }
         }
+    }
+
+    @Transactional
+    fun logout(userId: Long) {
+        refreshTokenRepository.deleteById(userId)
     }
 }
