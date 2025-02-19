@@ -1,7 +1,13 @@
-export type featureFlagTableType = {
+export enum FeatureFlagType {
+  Boolean = 'Boolean',
+  String = 'String',
+  Number = 'Number',
+}
+
+export interface FeatureFlagTableType {
   Key: string;
-  Type: string;
-  Created: string;
-  By: string;
-  ToggleButton: boolean;
-};
+  type: FeatureFlagType;
+  createdAt: string;
+  createdBy: string;
+  status: boolean;
+}

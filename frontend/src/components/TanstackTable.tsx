@@ -19,14 +19,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { featureFlagTableType } from '@/types/types';
+import { FeatureFlagTableType } from '@/types/types';
 
-export interface DataTableProps<TData extends featureFlagTableType, TValue> {
+export interface DataTableProps<TData extends FeatureFlagTableType, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData extends featureFlagTableType, TValue>({
+export function TanstackTable<TData extends FeatureFlagTableType, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -109,7 +109,7 @@ export function DataTable<TData extends featureFlagTableType, TValue>({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.previousPage()}
+              onClick={table.previousPage}
               disabled={pagination.pageIndex === 0}
             >
               Previous
@@ -117,7 +117,7 @@ export function DataTable<TData extends featureFlagTableType, TValue>({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.nextPage()}
+              onClick={table.nextPage}
               disabled={pagination.pageIndex >= table.getPageCount() - 1}
             >
               Next
