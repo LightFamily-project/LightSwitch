@@ -170,4 +170,24 @@ class FeatureFlagControllerTest {
         )
             .andExpect(status().isBadRequest)
     }
+
+    @Test
+    @WithMockUser(username = "1")
+    fun `should return 400 when request validation fails due to invalid type`() {
+        val request = CreateFeatureFlagRequest(
+            key = "new-feature",
+            status = true,
+            type = "invalid-type",
+            defaultValue = mapOf("default" to true),
+            description = "",
+        )
+
+        mockMvc.perform(
+            post("/api/v1/flags")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isBadRequest)
+    }
 }
