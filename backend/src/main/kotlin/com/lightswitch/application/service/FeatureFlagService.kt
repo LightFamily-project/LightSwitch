@@ -3,6 +3,7 @@ package com.lightswitch.application.service
 import com.lightswitch.infrastructure.database.entity.Condition
 import com.lightswitch.infrastructure.database.entity.FeatureFlag
 import com.lightswitch.infrastructure.database.entity.User
+import com.lightswitch.infrastructure.database.model.Type
 import com.lightswitch.infrastructure.database.repository.ConditionRepository
 import com.lightswitch.infrastructure.database.repository.FeatureFlagRepository
 import com.lightswitch.presentation.exception.BusinessException
@@ -28,7 +29,7 @@ class FeatureFlagService(
             featureFlagRepository.save(
                 FeatureFlag(
                     name = request.key,
-                    type = request.type,
+                    type = Type.from(request.type),
                     enabled = request.status,
                     description = request.description,
                     createdBy = user,

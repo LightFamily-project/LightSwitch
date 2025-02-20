@@ -2,6 +2,7 @@ package com.lightswitch.application.service
 
 import com.lightswitch.infrastructue.database.repository.BaseRepositoryTest
 import com.lightswitch.infrastructure.database.entity.User
+import com.lightswitch.infrastructure.database.model.Type
 import com.lightswitch.infrastructure.database.repository.ConditionRepository
 import com.lightswitch.infrastructure.database.repository.FeatureFlagRepository
 import com.lightswitch.infrastructure.database.repository.UserRepository
@@ -64,7 +65,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
         assertThat(flag.name).isEqualTo("user-limit")
         assertThat(flag.description).isEqualTo("User Limit Flag")
-        assertThat(flag.type).isEqualTo("number")
+        assertThat(flag.type).isEqualTo(Type.NUMBER)
         assertThat(flag.enabled).isTrue()
         assertThat(flag.createdBy).isEqualTo(user)
         assertThat(flag.updatedBy).isEqualTo(user)
@@ -106,7 +107,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
         assertThat(flag.name).isEqualTo("user-limit")
         assertThat(flag.description).isEqualTo("User Limit Flag")
-        assertThat(flag.type).isEqualTo("number")
+        assertThat(flag.type).isEqualTo(Type.NUMBER)
         assertThat(flag.enabled).isTrue()
         assertThat(flag.createdBy).isEqualTo(user)
         assertThat(flag.updatedBy).isEqualTo(user)
@@ -144,5 +145,30 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         assertThatThrownBy { featureFlagService.create(user, request) }
             .isInstanceOf(BusinessException::class.java)
             .hasMessageContaining("FeatureFlag with key duplicate-key already exists")
+    }
+
+    @Test
+    fun `create feature flag throw IllegalArgumentException when type is not supported`() {
+        val request =
+            CreateFeatureFlagRequest(
+                key = "invalid-type",
+                status = true,
+                type = "json",
+                defaultValue = mapOf("json" to 10),
+                description = "Invalid Type Test",
+                variants = listOf(mapOf("free" to 10)),
+            )
+        val user =
+            userRepository.save(
+                User(
+                    username = "username",
+                    passwordHash = "passwordHash",
+                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+                ),
+            )
+
+        assertThatThrownBy { featureFlagService.create(user, request) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("Unsupported type: json")
     }
 }

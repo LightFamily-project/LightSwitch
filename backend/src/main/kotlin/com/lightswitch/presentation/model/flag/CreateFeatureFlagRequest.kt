@@ -11,7 +11,7 @@ data class CreateFeatureFlagRequest(
     @field:NotNull(message = "Status is required.")
     val status: Boolean,
     @field:NotBlank(message = "Type is required.")
-    @field:Pattern(regexp = "^(number|boolean|string)$", message = "Type must be one of: number, boolean, string")
+    @field:Pattern(regexp = "(?i)^(number|boolean|string)$", message = "Type must be one of: number, boolean, string")
     val type: String,
     @field:NotEmpty(message = "Default value is required.")
     val defaultValue: Map<String, Any>,

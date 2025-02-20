@@ -20,7 +20,7 @@ data class FeatureFlagResponse(
             return FeatureFlagResponse(
                 key = flag.name,
                 status = flag.enabled,
-                type = flag.type,
+                type = flag.type.name,
                 defaultValue = mapOf(flag.defaultCondition!!.key to flag.defaultCondition!!.value),
                 description = flag.description,
                 variants = flag.conditions.map { mapOf(it.key to it.value) },

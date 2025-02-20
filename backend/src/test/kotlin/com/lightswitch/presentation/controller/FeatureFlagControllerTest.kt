@@ -5,6 +5,7 @@ import com.lightswitch.application.service.FeatureFlagService
 import com.lightswitch.infrastructure.database.entity.Condition
 import com.lightswitch.infrastructure.database.entity.FeatureFlag
 import com.lightswitch.infrastructure.database.entity.User
+import com.lightswitch.infrastructure.database.model.Type
 import com.lightswitch.infrastructure.database.repository.UserRepository
 import com.lightswitch.infrastructure.security.JwtTokenProvider
 import com.lightswitch.presentation.model.flag.CreateFeatureFlagRequest
@@ -51,7 +52,7 @@ class FeatureFlagControllerTest {
         val request = CreateFeatureFlagRequest(
             key = "new-feature",
             status = true,
-            type = "boolean",
+            type = "BOOLEAN",
             defaultValue = mapOf("default" to true),
             description = "Test feature flag",
         )
@@ -59,7 +60,7 @@ class FeatureFlagControllerTest {
             id = 1L,
             name = "new-feature",
             description = "Test feature flag",
-            type = "boolean",
+            type = Type.BOOLEAN,
             enabled = true,
             createdBy = user,
             updatedBy = user
@@ -81,7 +82,7 @@ class FeatureFlagControllerTest {
             .andExpect(jsonPath("$.message").value("Created flag successfully"))
             .andExpect(jsonPath("$.data.key").value("new-feature"))
             .andExpect(jsonPath("$.data.status").value(true))
-            .andExpect(jsonPath("$.data.type").value("boolean"))
+            .andExpect(jsonPath("$.data.type").value("BOOLEAN"))
             .andExpect(jsonPath("$.data.defaultValue.default").value(true))
             .andExpect(jsonPath("$.data.description").value("Test feature flag"))
             .andExpect(jsonPath("$.data.createdBy").value("username"))
