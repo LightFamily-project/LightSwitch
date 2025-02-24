@@ -36,10 +36,10 @@ services:
     volumes:
       - sqlite_data:/data
     networks:
-      - lightswitch_network
+      - lightswitch-network
 
 networks:
-  lightswitch_network:
+  lightswitch-network:
 
 volumes:
   sqlite_data:
