@@ -1,7 +1,13 @@
 package com.lightswitch.infrastructure.security
 
 import com.lightswitch.infrastructure.database.entity.User
-import io.jsonwebtoken.*
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.JwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.slf4j.Logger
@@ -10,13 +16,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Date
 import javax.crypto.SecretKey
 
-
 @Component
-class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
-
+class JwtTokenProvider(
+    @Value("\${jwt.secret}") private var secretKey: String,
+) {
     private val logger: Logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
 
     companion object {
@@ -27,46 +33,52 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         const val THREE_DAYS = 3 * 24 * 60 * 60 * 1000L // 3 days
     }
 
-    fun generateJwtToken(userId: Long, user: User): JwtToken {
+    fun generateJwtToken(
+        userId: Long,
+        user: User,
+    ): JwtToken {
         val now = Date()
         val accessToken = createAccessToken(userId, user, now)
 
-        val refreshTokenClaims: Claims = Jwts.claims().setSubject(userId.toString()).apply {
-            this[TYPE] = "refresh"
-        }
-        val refreshToken = Jwts.builder()
-            .setClaims(refreshTokenClaims)
-            .setIssuedAt(now)
-            .setExpiration(Date(now.time + REFRESH_VALID_TIME))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact()
+        val refreshTokenClaims: Claims =
+            Jwts.claims().setSubject(userId.toString()).apply {
+                this[TYPE] = "refresh"
+            }
+        val refreshToken =
+            Jwts.builder()
+                .setClaims(refreshTokenClaims)
+                .setIssuedAt(now)
+                .setExpiration(Date(now.time + REFRESH_VALID_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact()
 
         return JwtToken(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            accessTokenExpiredDate = ACCESS_VALID_TIME
+            accessTokenExpiredDate = ACCESS_VALID_TIME,
         )
     }
 
     private fun createAccessToken(
         userId: Long,
         user: User,
-        now: Date
+        now: Date,
     ): String? {
-        val accessTokenClaims: Claims = Jwts.claims().setSubject(userId.toString()).apply {
-            this[TYPE] = "access"
-            this[USER] = userToMap(user)
-        }
+        val accessTokenClaims: Claims =
+            Jwts.claims().setSubject(userId.toString()).apply {
+                this[TYPE] = "access"
+                this[USER] = userToMap(user)
+            }
 
-        val accessToken = Jwts.builder()
-            .setClaims(accessTokenClaims)
-            .setIssuedAt(now)
-            .setExpiration(Date(now.time + ACCESS_VALID_TIME))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact()
+        val accessToken =
+            Jwts.builder()
+                .setClaims(accessTokenClaims)
+                .setIssuedAt(now)
+                .setExpiration(Date(now.time + ACCESS_VALID_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact()
         return accessToken
     }
-
 
     private fun userToMap(user: User): Map<String, Any> {
         val userMap: MutableMap<String, Any> = HashMap()
@@ -78,17 +90,21 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         return userMap
     }
 
-
     private fun getSigningKey(): SecretKey? {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey))
     }
 
-    fun generateJwtAccessToken(userId: Long, user: User, now: Date, refreshToken: String): JwtToken {
+    fun generateJwtAccessToken(
+        userId: Long,
+        user: User,
+        now: Date,
+        refreshToken: String,
+    ): JwtToken {
         val accessToken = createAccessToken(userId, user, now)
         return JwtToken(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            accessTokenExpiredDate = ACCESS_VALID_TIME
+            accessTokenExpiredDate = ACCESS_VALID_TIME,
         )
     }
 
@@ -132,12 +148,12 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
         }
     }
 
-
     fun getRefreshTokenSubject(token: String): Long {
         return try {
             val claims = parseClaims(token)
-            if (claims[TYPE] != "refresh")
+            if (claims[TYPE] != "refresh") {
                 throw RuntimeException("Token is not refresh token")
+            }
 
             claims.subject.toLong()
         } catch (e: Exception) {
@@ -153,5 +169,4 @@ class JwtTokenProvider(@Value("\${jwt.secret}") private var secretKey: String) {
 
         return refreshExpiredTime - now <= THREE_DAYS
     }
-
 }

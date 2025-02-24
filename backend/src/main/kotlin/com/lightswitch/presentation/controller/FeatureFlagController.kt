@@ -29,7 +29,6 @@ class FeatureFlagController(
     private val featureFlagService: FeatureFlagService,
     private val userRepository: UserRepository,
 ) {
-
     @Operation(
         summary = "Retrieve all feature flags",
     )
@@ -54,7 +53,7 @@ class FeatureFlagController(
 
         return PayloadResponse.success(
             message = "Fetched a flag successfully",
-            data = FeatureFlagResponse.from(flag)
+            data = FeatureFlagResponse.from(flag),
         )
     }
 
@@ -74,7 +73,7 @@ class FeatureFlagController(
 
         return PayloadResponse.success(
             message = "Created flag successfully",
-            data = FeatureFlagResponse.from(flag)
+            data = FeatureFlagResponse.from(flag),
         )
     }
 
@@ -89,7 +88,7 @@ class FeatureFlagController(
         return PayloadResponse<FeatureFlagResponse>(
             status = "status",
             message = "message",
-            data = null
+            data = null,
         )
     }
 
@@ -104,7 +103,7 @@ class FeatureFlagController(
         return PayloadResponse<FeatureFlagResponse>(
             status = "status",
             message = "message",
-            data = null
+            data = null,
         )
     }
 

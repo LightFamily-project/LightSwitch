@@ -26,7 +26,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.BAD_REQUEST.name,
                     message = ex.message ?: "Invalid request",
-                )
+                ),
             )
     }
 
@@ -39,7 +39,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.BAD_REQUEST.name,
                     message = ex.message,
-                )
+                ),
             )
     }
 
@@ -52,7 +52,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.BAD_REQUEST.name,
                     message = ex.message ?: "Malformed JSON request",
-                )
+                ),
             )
     }
 
@@ -65,7 +65,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.BAD_REQUEST.name,
                     message = ex.message ?: "Entity not found",
-                )
+                ),
             )
     }
 
@@ -78,7 +78,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.UNAUTHORIZED.name,
                     message = "Invalid username or password",
-                )
+                ),
             )
     }
 
@@ -91,7 +91,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.UNAUTHORIZED.name,
                     message = ex.message ?: "Authentication failed",
-                )
+                ),
             )
     }
 
@@ -104,7 +104,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.FORBIDDEN.name,
                     message = ex.message ?: "Authorization failed",
-                )
+                ),
             )
     }
 
@@ -117,7 +117,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.INTERNAL_SERVER_ERROR.name,
                     message = ex.message ?: "Business error occurred",
-                )
+                ),
             )
     }
 
@@ -130,7 +130,7 @@ class GlobalExceptionHandler {
                 StatusResponse(
                     status = HttpStatus.INTERNAL_SERVER_ERROR.name,
                     message = "Unexpected error: ${ex.message}",
-                )
+                ),
             )
     }
 }

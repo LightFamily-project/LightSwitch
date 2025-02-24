@@ -6,23 +6,26 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
-import java.util.*
+import java.util.Date
 
 class JwtTokenProviderTest {
-
     private lateinit var jwtTokenProvider: JwtTokenProvider
     private val secretKey =
         "64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff"
-    val user = User(
-        id = 1L,
-        username = "testUser",
-        passwordHash = "passwordHash",
-        lastLoginAt = null
-    )
+    val user =
+        User(
+            id = 1L,
+            username = "testUser",
+            passwordHash = "passwordHash",
+            lastLoginAt = null,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -45,7 +48,7 @@ class JwtTokenProviderTest {
         val jwtToken = jwtTokenProvider.generateJwtAccessToken(user.id!!, user, now, "testRefreshToken")
 
         assertNotNull(jwtToken.accessToken)
-        assertEquals("testRefreshToken",jwtToken.refreshToken)
+        assertEquals("testRefreshToken", jwtToken.refreshToken)
         assertTrue(jwtToken.accessTokenExpiredDate!! > 0)
     }
 
@@ -92,12 +95,13 @@ class JwtTokenProviderTest {
         val issuedTime = Date(now.time - 5 * 24 * 60 * 60 * 1000L)
         val expiredTime = Date(now.time + 4 * 24 * 60 * 60 * 1000L)
 
-        val refreshToken = Jwts.builder()
-            .setSubject("1")
-            .setIssuedAt(issuedTime)
-            .setExpiration(expiredTime)
-            .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
-            .compact()
+        val refreshToken =
+            Jwts.builder()
+                .setSubject("1")
+                .setIssuedAt(issuedTime)
+                .setExpiration(expiredTime)
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
+                .compact()
 
         val result = jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken)
 
@@ -110,16 +114,16 @@ class JwtTokenProviderTest {
         val issuedTime = Date(now.time - 5 * 24 * 60 * 60 * 1000L)
         val expiredTime = Date(now.time + 2 * 24 * 60 * 60 * 1000L)
 
-        val refreshToken = Jwts.builder()
-            .setSubject("1")
-            .setIssuedAt(issuedTime)
-            .setExpiration(expiredTime)
-            .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
-            .compact()
+        val refreshToken =
+            Jwts.builder()
+                .setSubject("1")
+                .setIssuedAt(issuedTime)
+                .setExpiration(expiredTime)
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
+                .compact()
 
         val result = jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken)
 
         assertTrue(result)
     }
-
 }

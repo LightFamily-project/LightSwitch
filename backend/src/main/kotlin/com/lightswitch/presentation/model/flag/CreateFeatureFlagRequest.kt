@@ -20,5 +20,6 @@ data class CreateFeatureFlagRequest(
     val variants: List<Map<String, Any>>? = null,
 ) {
     fun defaultValueAsPair(): Pair<String, Any> = defaultValue.entries.first().toPair()
+
     fun variantPairs(): List<Pair<String, Any>>? = variants?.map { it.entries.first().toPair() }
 }

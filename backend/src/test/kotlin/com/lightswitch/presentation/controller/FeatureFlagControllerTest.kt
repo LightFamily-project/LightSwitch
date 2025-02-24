@@ -23,13 +23,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.*
+import java.util.Optional
 import kotlin.test.Test
 
 @WebMvcTest(controllers = [FeatureFlagController::class])
 @ExtendWith(MockitoExtension::class)
 class FeatureFlagControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -49,22 +48,24 @@ class FeatureFlagControllerTest {
     @WithMockUser(username = "1")
     fun `should create feature flag successfully`() {
         val user = User(id = 1L, username = "username", passwordHash = "passwordHash")
-        val request = CreateFeatureFlagRequest(
-            key = "new-feature",
-            status = true,
-            type = "BOOLEAN",
-            defaultValue = mapOf("default" to true),
-            description = "Test feature flag",
-        )
-        val flag = FeatureFlag(
-            id = 1L,
-            name = "new-feature",
-            description = "Test feature flag",
-            type = Type.BOOLEAN,
-            enabled = true,
-            createdBy = user,
-            updatedBy = user
-        )
+        val request =
+            CreateFeatureFlagRequest(
+                key = "new-feature",
+                status = true,
+                type = "BOOLEAN",
+                defaultValue = mapOf("default" to true),
+                description = "Test feature flag",
+            )
+        val flag =
+            FeatureFlag(
+                id = 1L,
+                name = "new-feature",
+                description = "Test feature flag",
+                type = Type.BOOLEAN,
+                enabled = true,
+                createdBy = user,
+                updatedBy = user,
+            )
         val condition = Condition(id = 1L, key = "default", value = true, flag = flag)
         flag.defaultCondition = condition
 
@@ -75,7 +76,7 @@ class FeatureFlagControllerTest {
             post("/api/v1/flags")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("Success"))
@@ -95,19 +96,20 @@ class FeatureFlagControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `should return 400 when request validation fails due to empty key`() {
-        val request = CreateFeatureFlagRequest(
-            key = "",
-            status = true,
-            type = "boolean",
-            defaultValue = mapOf("default" to true),
-            description = "Test feature flag",
-        )
+        val request =
+            CreateFeatureFlagRequest(
+                key = "",
+                status = true,
+                type = "boolean",
+                defaultValue = mapOf("default" to true),
+                description = "Test feature flag",
+            )
 
         mockMvc.perform(
             post("/api/v1/flags")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
     }
@@ -115,19 +117,20 @@ class FeatureFlagControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `should return 400 when request validation fails due to empty type`() {
-        val request = CreateFeatureFlagRequest(
-            key = "new-feature",
-            status = true,
-            type = "",
-            defaultValue = mapOf("default" to true),
-            description = "Test feature flag",
-        )
+        val request =
+            CreateFeatureFlagRequest(
+                key = "new-feature",
+                status = true,
+                type = "",
+                defaultValue = mapOf("default" to true),
+                description = "Test feature flag",
+            )
 
         mockMvc.perform(
             post("/api/v1/flags")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
     }
@@ -135,19 +138,20 @@ class FeatureFlagControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `should return 400 when request validation fails due to empty defaultValue`() {
-        val request = CreateFeatureFlagRequest(
-            key = "new-feature",
-            status = true,
-            type = "boolean",
-            defaultValue = emptyMap(),
-            description = "Test feature flag",
-        )
+        val request =
+            CreateFeatureFlagRequest(
+                key = "new-feature",
+                status = true,
+                type = "boolean",
+                defaultValue = emptyMap(),
+                description = "Test feature flag",
+            )
 
         mockMvc.perform(
             post("/api/v1/flags")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
     }
@@ -155,19 +159,20 @@ class FeatureFlagControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `should return 400 when request validation fails due to empty description`() {
-        val request = CreateFeatureFlagRequest(
-            key = "new-feature",
-            status = true,
-            type = "boolean",
-            defaultValue = mapOf("default" to true),
-            description = "",
-        )
+        val request =
+            CreateFeatureFlagRequest(
+                key = "new-feature",
+                status = true,
+                type = "boolean",
+                defaultValue = mapOf("default" to true),
+                description = "",
+            )
 
         mockMvc.perform(
             post("/api/v1/flags")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
     }
@@ -175,19 +180,20 @@ class FeatureFlagControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `should return 400 when request validation fails due to invalid type`() {
-        val request = CreateFeatureFlagRequest(
-            key = "new-feature",
-            status = true,
-            type = "invalid-type",
-            defaultValue = mapOf("default" to true),
-            description = "",
-        )
+        val request =
+            CreateFeatureFlagRequest(
+                key = "new-feature",
+                status = true,
+                type = "invalid-type",
+                defaultValue = mapOf("default" to true),
+                description = "",
+            )
 
         mockMvc.perform(
             post("/api/v1/flags")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
     }

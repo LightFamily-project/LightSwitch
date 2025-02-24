@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
 @ExtendWith(MockitoExtension::class)
 class UserControllerTest {
-
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -50,13 +49,12 @@ class UserControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"username": "testUser", "password": "password"}""")
+                .content("""{"username": "testUser", "password": "password"}"""),
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessToken").value("accessToken"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.refreshToken").value("refreshToken"))
     }
-
 
     @Test
     fun `should refresh user token successfully`() {
@@ -68,7 +66,7 @@ class UserControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.put("/api/v1/users/auth/refresh")
                 .header("Authorization", refreshToken)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessToken").value("newAccessToken"))
@@ -81,10 +79,9 @@ class UserControllerTest {
             MockMvcRequestBuilders.post("/api/v1/users/logout")
                 .header("Authorization", "Bearer someAccessToken")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"username": "testUser", "password": "password"}""")
+                .content("""{"username": "testUser", "password": "password"}"""),
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.jsonPath("$.data").value("testUser"))
-
     }
 }

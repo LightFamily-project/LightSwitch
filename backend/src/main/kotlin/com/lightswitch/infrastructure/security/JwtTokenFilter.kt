@@ -13,7 +13,6 @@ import java.io.IOException
 class JwtTokenFilter(
     private val jwtTokenProvider: JwtTokenProvider,
 ) : OncePerRequestFilter() {
-
     companion object {
         const val HEADER_STRING = "Authorization"
         const val TOKEN_PREFIX = "Bearer "
@@ -23,7 +22,7 @@ class JwtTokenFilter(
     public override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        filterChain: FilterChain
+        filterChain: FilterChain,
     ) {
         getTokenFromRequest(request)
             ?.takeIf { jwtTokenProvider.validateToken(it) }
