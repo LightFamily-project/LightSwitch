@@ -3,6 +3,7 @@ package com.lightswitch.presentation.model.flag
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
 
 data class CreateFeatureFlagRequest(
     @field:NotBlank(message = "Key is required.")
@@ -10,6 +11,7 @@ data class CreateFeatureFlagRequest(
     @field:NotNull(message = "Status is required.")
     val status: Boolean,
     @field:NotBlank(message = "Type is required.")
+    @field:Pattern(regexp = "(?i)^(number|boolean|string)$", message = "Type must be one of: number, boolean, string")
     val type: String,
     @field:NotEmpty(message = "Default value is required.")
     val defaultValue: Map<String, Any>,

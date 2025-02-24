@@ -31,11 +31,14 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
         http
+            .csrf {
+                it.disable()
+            }
             .authorizeHttpRequests { auth ->
                 auth
                     .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.REQUEST)
                     .permitAll()
-                    .requestMatchers("/login/**").permitAll()
+                    .requestMatchers("/api/v1/users/**").permitAll()
                     .anyRequest().authenticated()
 
             }
@@ -46,7 +49,10 @@ class SecurityConfig(
             .formLogin { form ->
                 form.disable()
             }
-            .addFilterBefore(JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterBefore(
+                JwtTokenFilter(jwtTokenProvider),
+                UsernamePasswordAuthenticationFilter::class.java
+            )
 
         return http.build()
     }

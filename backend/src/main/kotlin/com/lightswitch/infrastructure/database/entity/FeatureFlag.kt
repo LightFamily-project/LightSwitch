@@ -1,8 +1,11 @@
 package com.lightswitch.infrastructure.database.entity
 
+import com.lightswitch.infrastructure.database.model.Type
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -26,7 +29,8 @@ class FeatureFlag(
     @Column(nullable = false)
     val description: String,
     @Column(nullable = false)
-    val type: String,
+    @Enumerated(value = EnumType.STRING)
+    val type: Type,
     @Column(nullable = false)
     var enabled: Boolean,
     @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], optional = true)

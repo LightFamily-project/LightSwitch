@@ -10,10 +10,14 @@ import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 
 @Component
-class JwtTokenFilter(private val jwtTokenProvider: JwtTokenProvider) : OncePerRequestFilter() {
+class JwtTokenFilter(
+    private val jwtTokenProvider: JwtTokenProvider,
+) : OncePerRequestFilter() {
 
-    private val HEADER_STRING = "Authorization"
-    private val TOKEN_PREFIX = "Bearer "
+    companion object {
+        const val HEADER_STRING = "Authorization"
+        const val TOKEN_PREFIX = "Bearer "
+    }
 
     @Throws(ServletException::class, IOException::class)
     public override fun doFilterInternal(

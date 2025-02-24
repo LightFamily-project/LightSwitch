@@ -77,11 +77,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser({ id: tempRandomId });
   };
 
-  useEffect(() => {
-    if (requiresSetup) router.replace(PATHS.SETUP);
-    if (!user) router.replace(PATHS.LOGIN);
-  }, [requiresSetup, router, user]);
-
   return (
     <AuthContext.Provider
       value={{

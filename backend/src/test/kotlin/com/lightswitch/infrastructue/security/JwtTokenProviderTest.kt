@@ -42,10 +42,10 @@ class JwtTokenProviderTest {
     @Test
     fun `generateJwtAccessToken should return only access token`() {
         val now = Date()
-        val jwtToken = jwtTokenProvider.generateJwtAccessToken(user.id!!, user, now)
+        val jwtToken = jwtTokenProvider.generateJwtAccessToken(user.id!!, user, now, "testRefreshToken")
 
         assertNotNull(jwtToken.accessToken)
-        assertNull(jwtToken.refreshToken)
+        assertEquals("testRefreshToken",jwtToken.refreshToken)
         assertTrue(jwtToken.accessTokenExpiredDate!! > 0)
     }
 
@@ -101,11 +101,11 @@ class JwtTokenProviderTest {
 
         val result = jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken)
 
-        assertTrue(result)
+        assertFalse(result)
     }
 
     @Test
-    fun `refreshTokenPeriodCheck should return false if refresh token expired less than 3 days`() {
+    fun `refreshTokenPeriodCheck should return true if refresh token expired less than 3 days`() {
         val now = Date()
         val issuedTime = Date(now.time - 5 * 24 * 60 * 60 * 1000L)
         val expiredTime = Date(now.time + 2 * 24 * 60 * 60 * 1000L)
@@ -119,7 +119,7 @@ class JwtTokenProviderTest {
 
         val result = jwtTokenProvider.isRefreshTokenRenewalRequired(refreshToken)
 
-        assertFalse(result)
+        assertTrue(result)
     }
 
 }
