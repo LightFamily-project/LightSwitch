@@ -52,7 +52,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             FeatureFlag(
                 name = "feature-1",
                 description = "Feature Flag 1",
-                type = "boolean",
+                type = Type.BOOLEAN,
                 enabled = true,
                 createdBy = user,
                 updatedBy = user
@@ -62,7 +62,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             FeatureFlag(
                 name = "feature-2",
                 description = "Feature Flag 2",
-                type = "number",
+                type = Type.NUMBER,
                 enabled = false,
                 createdBy = user,
                 updatedBy = user
@@ -72,7 +72,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             FeatureFlag(
                 name = "feature-3",
                 description = "Feature Flag 3",
-                type = "string",
+                type = Type.STRING,
                 enabled = true,
                 createdBy = user,
                 updatedBy = user
@@ -88,9 +88,9 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         assertThat(flags)
             .extracting("name", "description", "type", "enabled", "createdBy", "updatedBy")
             .containsExactly(
-                tuple("feature-1", "Feature Flag 1", "boolean", true, user, user),
-                tuple("feature-2", "Feature Flag 2", "number", false, user, user),
-                tuple("feature-3", "Feature Flag 3", "string", true, user, user),
+                tuple("feature-1", "Feature Flag 1", Type.BOOLEAN, true, user, user),
+                tuple("feature-2", "Feature Flag 2", Type.NUMBER, false, user, user),
+                tuple("feature-3", "Feature Flag 3", Type.STRING, true, user, user),
             )
         assertThat(flags)
             .extracting("defaultCondition.key", "defaultCondition.value")
@@ -118,7 +118,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         val flag = FeatureFlag(
             name = "user-limit",
             description = "User Limit Flag",
-            type = "number",
+            type = Type.NUMBER,
             enabled = true,
             createdBy = user,
             updatedBy = user,
@@ -143,7 +143,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             FeatureFlag(
                 name = "user-limit",
                 description = "User Limit Flag",
-                type = "number",
+                type = Type.NUMBER,
                 enabled = true,
                 createdBy = user,
                 updatedBy = user
@@ -166,7 +166,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         assertThat(flag.id).isNotNull()
         assertThat(flag.name).isEqualTo("user-limit")
         assertThat(flag.description).isEqualTo("User Limit Flag")
-        assertThat(flag.type).isEqualTo("number")
+        assertThat(flag.type).isEqualTo(Type.NUMBER)
         assertThat(flag.enabled).isTrue()
         assertThat(flag.createdBy).isEqualTo(user)
         assertThat(flag.updatedBy).isEqualTo(user)
@@ -206,7 +206,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         val flag = FeatureFlag(
             name = "user-limit",
             description = "User Limit Flag",
-            type = "number",
+            type = Type.NUMBER,
             enabled = true,
             createdBy = user,
             updatedBy = user,
