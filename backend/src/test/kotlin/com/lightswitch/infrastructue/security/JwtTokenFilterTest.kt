@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 
 class JwtTokenFilterTest {
-
     @Mock
     private lateinit var jwtTokenProvider: JwtTokenProvider
 

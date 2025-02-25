@@ -6,7 +6,10 @@ data class PayloadResponse<T>(
     val data: T? = null,
 ) {
     companion object {
-        fun <T> success(message: String, data: T): PayloadResponse<T> {
+        fun <T> success(
+            message: String,
+            data: T,
+        ): PayloadResponse<T> {
             return PayloadResponse("Success", message, data)
         }
     }

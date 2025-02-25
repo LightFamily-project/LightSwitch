@@ -3,7 +3,8 @@ package com.lightswitch.infrastructure.database.model
 enum class Type {
     NUMBER,
     BOOLEAN,
-    STRING;
+    STRING,
+    ;
 
     companion object {
         fun from(type: String): Type {

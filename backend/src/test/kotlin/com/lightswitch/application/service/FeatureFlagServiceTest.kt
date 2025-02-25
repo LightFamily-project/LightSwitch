@@ -41,43 +41,47 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `getFlags should return all feature flags`() {
-        val user = userRepository.save(
-            User(
-                username = "test-user",
-                passwordHash = "passwordHash",
-                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+        val user =
+            userRepository.save(
+                User(
+                    username = "test-user",
+                    passwordHash = "passwordHash",
+                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+                ),
             )
-        )
-        val flag1 = featureFlagRepository.save(
-            FeatureFlag(
-                name = "feature-1",
-                description = "Feature Flag 1",
-                type = Type.BOOLEAN,
-                enabled = true,
-                createdBy = user,
-                updatedBy = user
+        val flag1 =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "feature-1",
+                    description = "Feature Flag 1",
+                    type = Type.BOOLEAN,
+                    enabled = true,
+                    createdBy = user,
+                    updatedBy = user,
+                ),
             )
-        )
-        val flag2 = featureFlagRepository.save(
-            FeatureFlag(
-                name = "feature-2",
-                description = "Feature Flag 2",
-                type = Type.NUMBER,
-                enabled = false,
-                createdBy = user,
-                updatedBy = user
+        val flag2 =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "feature-2",
+                    description = "Feature Flag 2",
+                    type = Type.NUMBER,
+                    enabled = false,
+                    createdBy = user,
+                    updatedBy = user,
+                ),
             )
-        )
-        val flag3 = featureFlagRepository.save(
-            FeatureFlag(
-                name = "feature-3",
-                description = "Feature Flag 3",
-                type = Type.STRING,
-                enabled = true,
-                createdBy = user,
-                updatedBy = user
+        val flag3 =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "feature-3",
+                    description = "Feature Flag 3",
+                    type = Type.STRING,
+                    enabled = true,
+                    createdBy = user,
+                    updatedBy = user,
+                ),
             )
-        )
         flag1.defaultCondition = Condition(flag = flag1, key = "boolean", value = true)
         flag2.defaultCondition = Condition(flag = flag2, key = "number", value = 10)
         flag3.defaultCondition = Condition(flag = flag3, key = "string", value = "value")
@@ -108,23 +112,25 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `getFlags should return empty list when all feature flags are deleted`() {
-        val user = userRepository.save(
-            User(
-                username = "test-user",
-                passwordHash = "passwordHash",
-                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-            ),
-        )
-        val flag = FeatureFlag(
-            name = "user-limit",
-            description = "User Limit Flag",
-            type = Type.NUMBER,
-            enabled = true,
-            createdBy = user,
-            updatedBy = user,
-        ).apply {
-            this.deletedAt = Instant.now()
-        }
+        val user =
+            userRepository.save(
+                User(
+                    username = "test-user",
+                    passwordHash = "passwordHash",
+                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+                ),
+            )
+        val flag =
+            FeatureFlag(
+                name = "user-limit",
+                description = "User Limit Flag",
+                type = Type.NUMBER,
+                enabled = true,
+                createdBy = user,
+                updatedBy = user,
+            ).apply {
+                this.deletedAt = Instant.now()
+            }
         featureFlagRepository.save(flag)
 
         assertThat(featureFlagService.getFlags()).isEmpty()
@@ -132,34 +138,39 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `getFlagOrThrow should return feature flag when key exists`() {
-        val user = userRepository.save(
-            User(
-                username = "test-user",
-                passwordHash = "passwordHash",
-                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-            ),
-        )
-        val savedFlag = featureFlagRepository.save(
-            FeatureFlag(
-                name = "user-limit",
-                description = "User Limit Flag",
-                type = Type.NUMBER,
-                enabled = true,
-                createdBy = user,
-                updatedBy = user
+        val user =
+            userRepository.save(
+                User(
+                    username = "test-user",
+                    passwordHash = "passwordHash",
+                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+                ),
             )
-        )
+        val savedFlag =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "user-limit",
+                    description = "User Limit Flag",
+                    type = Type.NUMBER,
+                    enabled = true,
+                    createdBy = user,
+                    updatedBy = user,
+                ),
+            )
         val defaultCondition = Condition(flag = savedFlag, key = "number", value = 10)
-        val conditions = listOf(
-            Condition(flag = savedFlag, key = "free", value = 10),
-            Condition(flag = savedFlag, key = "pro", value = 100),
-            Condition(flag = savedFlag, key = "enterprise", value = 1000),
+        val conditions =
+            listOf(
+                Condition(flag = savedFlag, key = "free", value = 10),
+                Condition(flag = savedFlag, key = "pro", value = 100),
+                Condition(flag = savedFlag, key = "enterprise", value = 1000),
+            )
+        featureFlagRepository.save(
+            savedFlag.apply {
+                this.defaultCondition = defaultCondition
+                this.conditions.addAll(conditions)
+                this.conditions.add(defaultCondition)
+            },
         )
-        featureFlagRepository.save(savedFlag.apply {
-            this.defaultCondition = defaultCondition
-            this.conditions.addAll(conditions)
-            this.conditions.add(defaultCondition)
-        })
 
         val flag = featureFlagService.getFlagOrThrow("user-limit")
 
@@ -193,26 +204,27 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             .hasMessageContaining("Feature flag $nonExistentKey does not exist")
     }
 
-
     @Test
     fun `getFlagOrThrow should not return when feature flag is deleted`() {
-        val user = userRepository.save(
-            User(
-                username = "test-user",
-                passwordHash = "passwordHash",
-                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-            ),
-        )
-        val flag = FeatureFlag(
-            name = "user-limit",
-            description = "User Limit Flag",
-            type = Type.NUMBER,
-            enabled = true,
-            createdBy = user,
-            updatedBy = user,
-        ).apply {
-            this.deletedAt = Instant.now()
-        }
+        val user =
+            userRepository.save(
+                User(
+                    username = "test-user",
+                    passwordHash = "passwordHash",
+                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+                ),
+            )
+        val flag =
+            FeatureFlag(
+                name = "user-limit",
+                description = "User Limit Flag",
+                type = Type.NUMBER,
+                enabled = true,
+                createdBy = user,
+                updatedBy = user,
+            ).apply {
+                this.deletedAt = Instant.now()
+            }
         featureFlagRepository.save(flag)
 
         assertThatThrownBy { featureFlagService.getFlagOrThrow("user-limit") }
