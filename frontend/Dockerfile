@@ -1,4 +1,4 @@
-FROM node:20 AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install PNPM
@@ -6,13 +6,13 @@ RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 # use dependency cache with using package.json& pnpm-lock.yaml
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
 
+RUN pnpm install --frozen-lockfile && ls -al node_modules
 COPY . .
 RUN pnpm build
 
 # Nginx로 정적 파일 서빙
-FROM nginx:1.25
+FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 COPY --from=builder /app/.next/static ./static
