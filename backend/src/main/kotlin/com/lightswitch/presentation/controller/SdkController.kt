@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
-
 @RestController
 @RequestMapping("/api/v1/sdks")
 class SdkController {
@@ -18,12 +17,13 @@ class SdkController {
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createKey(@RequestBody request: CreateSdkKeyRequest): PayloadResponse<SdkKeyResponse> {
-
+    fun createKey(
+        @RequestBody request: CreateSdkKeyRequest,
+    ): PayloadResponse<SdkKeyResponse> {
         return PayloadResponse<SdkKeyResponse>(
             status = "status",
             message = "message",
-            data = null
+            data = null,
         )
     }
 
@@ -31,12 +31,14 @@ class SdkController {
         summary = "Get SDK key",
     )
     @GetMapping
-    fun getKey(@RequestParam sdkType: String): PayloadResponse<SdkKeyResponse> {
-        checkSdkType(sdkType);
+    fun getKey(
+        @RequestParam sdkType: String,
+    ): PayloadResponse<SdkKeyResponse> {
+        checkSdkType(sdkType)
         return PayloadResponse<SdkKeyResponse>(
             status = "status",
             message = "message",
-            data = null
+            data = null,
         )
     }
 
@@ -44,14 +46,16 @@ class SdkController {
         summary = "Connect to SSE",
     )
     @GetMapping("/sse-connect")
-    fun connectSse(@RequestParam sdkKey: String): StatusResponse {
+    fun connectSse(
+        @RequestParam sdkKey: String,
+    ): StatusResponse {
         return StatusResponse(
             status = "status",
-            message = "message"
+            message = "message",
         )
     }
 
-    fun checkSdkType(sdkType: String){
+    fun checkSdkType(sdkType: String) {
         SdkType.from(sdkType)
     }
 }

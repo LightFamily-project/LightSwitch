@@ -13,7 +13,7 @@ class SdkKeyResponse(
             return SdkKeyResponse(
                 key = sdk.sdkKey,
                 type = sdk.sdkType,
-                connectedAt = sdk.connectedAt
+                connectedAt = sdk.connectedAt,
             )
         }
     }

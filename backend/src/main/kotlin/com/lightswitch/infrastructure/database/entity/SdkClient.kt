@@ -15,5 +15,5 @@ class SdkClient(
     var connectedAt: Instant,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    val user: User
+    val user: User,
 ) : BaseEntity()

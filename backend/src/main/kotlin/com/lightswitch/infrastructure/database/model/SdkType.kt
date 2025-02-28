@@ -2,7 +2,8 @@ package com.lightswitch.infrastructure.database.model
 
 enum class SdkType {
     JAVA,
-    PYTHON;
+    PYTHON,
+    ;
 
     companion object {
         fun from(type: String): SdkType {
