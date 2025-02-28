@@ -14,12 +14,8 @@ data class CreateFeatureFlagRequest(
     @field:Pattern(regexp = "(?i)^(number|boolean|string)$", message = "Type must be one of: number, boolean, string")
     val type: String,
     @field:NotEmpty(message = "Default value is required.")
-    val defaultValue: Map<String, Any>,
+    override val defaultValue: Map<String, Any>,
     @field:NotBlank(message = "Description is required.")
     val description: String,
-    val variants: List<Map<String, Any>>? = null,
-) {
-    fun defaultValueAsPair(): Pair<String, Any> = defaultValue.entries.first().toPair()
-
-    fun variantPairs(): List<Pair<String, Any>>? = variants?.map { it.entries.first().toPair() }
-}
+    override val variants: List<Map<String, Any>>? = null,
+) : FeatureFlagRequest

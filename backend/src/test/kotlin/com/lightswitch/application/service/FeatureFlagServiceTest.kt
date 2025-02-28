@@ -10,6 +10,8 @@ import com.lightswitch.infrastructure.database.repository.FeatureFlagRepository
 import com.lightswitch.infrastructure.database.repository.UserRepository
 import com.lightswitch.presentation.exception.BusinessException
 import com.lightswitch.presentation.model.flag.CreateFeatureFlagRequest
+import com.lightswitch.presentation.model.flag.UpdateFeatureFlagRequest
+import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
@@ -41,14 +43,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `getFlags should return all feature flags`() {
-        val user =
-            userRepository.save(
-                User(
-                    username = "test-user",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
+        val user = saveTestUser()
         val flag1 =
             featureFlagRepository.save(
                 FeatureFlag(
@@ -112,14 +107,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `getFlags should return empty list when all feature flags are deleted`() {
-        val user =
-            userRepository.save(
-                User(
-                    username = "test-user",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
+        val user = saveTestUser()
         val flag =
             FeatureFlag(
                 name = "user-limit",
@@ -138,14 +126,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `getFlagOrThrow should return feature flag when key exists`() {
-        val user =
-            userRepository.save(
-                User(
-                    username = "test-user",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
+        val user = saveTestUser()
         val savedFlag =
             featureFlagRepository.save(
                 FeatureFlag(
@@ -196,24 +177,17 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
     }
 
     @Test
-    fun `getFlagOrThrow should throw BusinessException when key does not exist`() {
+    fun `getFlagOrThrow should throw EntityNotFoundException when key does not exist`() {
         val nonExistentKey = "non-existent-key"
 
         assertThatThrownBy { featureFlagService.getFlagOrThrow(nonExistentKey) }
-            .isInstanceOf(BusinessException::class.java)
+            .isInstanceOf(EntityNotFoundException::class.java)
             .hasMessageContaining("Feature flag $nonExistentKey does not exist")
     }
 
     @Test
     fun `getFlagOrThrow should not return when feature flag is deleted`() {
-        val user =
-            userRepository.save(
-                User(
-                    username = "test-user",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
+        val user = saveTestUser()
         val flag =
             FeatureFlag(
                 name = "user-limit",
@@ -228,12 +202,13 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         featureFlagRepository.save(flag)
 
         assertThatThrownBy { featureFlagService.getFlagOrThrow("user-limit") }
-            .isInstanceOf(BusinessException::class.java)
+            .isInstanceOf(EntityNotFoundException::class.java)
             .hasMessageContaining("Feature flag user-limit does not exist")
     }
 
     @Test
     fun `create feature flag can save feature flag & conditions`() {
+        val user = saveTestUser()
         val request =
             CreateFeatureFlagRequest(
                 key = "user-limit",
@@ -247,14 +222,6 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                         mapOf("pro" to 100),
                         mapOf("enterprise" to 1000),
                     ),
-            )
-        val user =
-            userRepository.save(
-                User(
-                    username = "username",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
             )
 
         val flag = featureFlagService.create(user, request)
@@ -281,6 +248,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `create feature flag with only defaultValue`() {
+        val user = saveTestUser()
         val request =
             CreateFeatureFlagRequest(
                 key = "user-limit",
@@ -290,15 +258,6 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                 description = "User Limit Flag",
                 variants = null,
             )
-        val user =
-            userRepository.save(
-                User(
-                    username = "username",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
-
         val flag = featureFlagService.create(user, request)
 
         assertThat(flag.name).isEqualTo("user-limit")
@@ -327,14 +286,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                 description = "Duplicate Key Test",
                 variants = listOf(mapOf("free" to 10)),
             )
-        val user =
-            userRepository.save(
-                User(
-                    username = "username",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
+        val user = saveTestUser()
 
         featureFlagService.create(user, request)
 
@@ -345,6 +297,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `create feature flag throw IllegalArgumentException when type is not supported`() {
+        val user = saveTestUser()
         val request =
             CreateFeatureFlagRequest(
                 key = "invalid-type",
@@ -354,17 +307,159 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                 description = "Invalid Type Test",
                 variants = listOf(mapOf("free" to 10)),
             )
-        val user =
-            userRepository.save(
-                User(
-                    username = "username",
-                    passwordHash = "passwordHash",
-                    lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
-                ),
-            )
 
         assertThatThrownBy { featureFlagService.create(user, request) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessageContaining("Unsupported type: json")
     }
+
+    @Test
+    fun `update feature flag can update feature flag`() {
+        val user = saveTestUser()
+        val flag =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "user-limit",
+                    description = "description",
+                    type = Type.BOOLEAN,
+                    enabled = true,
+                    createdBy = user,
+                    updatedBy = user,
+                ),
+            ).apply {
+                this.defaultCondition = Condition(flag = this, key = "boolean", value = true)
+                this.conditions.add(this.defaultCondition!!)
+                this.conditions.add(Condition(flag = this, key = "free", value = true))
+            }.also {
+                featureFlagRepository.save(it)
+            }
+        val request =
+            UpdateFeatureFlagRequest(
+                key = "user-limit-updated",
+                type = "number",
+                description = "Updated description",
+                defaultValue = mapOf("number" to 123),
+                variants =
+                    listOf(
+                        mapOf("free" to 10),
+                        mapOf("pro" to 100),
+                    ),
+            )
+
+        val updated = featureFlagService.update(user, "user-limit", request)
+
+        assertThat(flag.id).isEqualTo(updated.id)
+        assertThat(updated.name).isEqualTo("user-limit-updated")
+        assertThat(updated.description).isEqualTo("Updated description")
+        assertThat(updated.type).isEqualTo(Type.NUMBER)
+        assertThat(updated.defaultCondition)
+            .extracting("key", "value")
+            .containsExactly("number", 123)
+        assertThat(updated.conditions)
+            .hasSize(3)
+            .extracting("key", "value")
+            .containsExactlyInAnyOrder(
+                tuple("number", 123),
+                tuple("free", 10),
+                tuple("pro", 100),
+            )
+        assertThat(updated.updatedBy.id).isEqualTo(user.id)
+    }
+
+    @Test
+    fun `update feature flag throw BusinessException if trying to rename to an existing key`() {
+        val user = saveTestUser()
+        featureFlagRepository.save(
+            FeatureFlag(
+                name = "flag-one",
+                description = "Flag One",
+                type = Type.STRING,
+                enabled = true,
+                createdBy = user,
+                updatedBy = user,
+            ),
+        )
+        featureFlagRepository.save(
+            FeatureFlag(
+                name = "flag-two",
+                description = "Flag Two",
+                type = Type.STRING,
+                enabled = true,
+                createdBy = user,
+                updatedBy = user,
+            ),
+        )
+        val request =
+            UpdateFeatureFlagRequest(
+                key = "flag-two",
+                type = "boolean",
+                description = "Try rename",
+                defaultValue = mapOf("boolean" to true),
+                variants = null,
+            )
+
+        assertThatThrownBy {
+            featureFlagService.update(user, "flag-one", request)
+        }
+            .isInstanceOf(BusinessException::class.java)
+            .hasMessageContaining("FeatureFlag with key flag-two already exists")
+    }
+
+    @Test
+    fun `update feature flag throw EntityNotFoundException if trying to update non-existent flag`() {
+        val user = saveTestUser()
+        val nonExistentKey = "not-exist"
+        val request =
+            UpdateFeatureFlagRequest(
+                key = "not-exist",
+                type = "boolean",
+                description = "Desc",
+                defaultValue = mapOf("boolean" to false),
+                variants = null,
+            )
+
+        assertThatThrownBy {
+            featureFlagService.update(user, nonExistentKey, request)
+        }
+            .isInstanceOf(EntityNotFoundException::class.java)
+            .hasMessageContaining("Feature flag $nonExistentKey does not exist")
+    }
+
+    @Test
+    fun `update feature flag throw IllegalArgumentException if type is invalid`() {
+        val user = saveTestUser()
+        featureFlagRepository.save(
+            FeatureFlag(
+                name = "flag-invalid-type",
+                description = "Test Flag",
+                type = Type.BOOLEAN,
+                enabled = true,
+                createdBy = user,
+                updatedBy = user,
+            ),
+        )
+        val request =
+            UpdateFeatureFlagRequest(
+                key = "flag-invalid-type",
+                type = "json",
+                description = "Invalid Type",
+                defaultValue = mapOf("json" to "whatever"),
+                variants = null,
+            )
+
+        assertThatThrownBy {
+            featureFlagService.update(user, "flag-invalid-type", request)
+        }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("Unsupported type: json")
+    }
+
+    private fun saveTestUser() =
+        userRepository.save(
+            User(
+                username = "test-user",
+                passwordHash = "test-pass",
+                lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
+            ),
+        )
 }
