@@ -1,9 +1,14 @@
 FROM azul/zulu-openjdk:17
 LABEL authors="eunhwa"
 
+WORKDIR /app
+COPY ./ /app
 
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
+RUN chmod 755 ./gradlew
+RUN ./gradlew clean build
+
+ARG JAR_FILE=build/libs/backend-0.0.1-SNAPSHOT.jar
+COPY ${JAR_FILE} /app.jar
 
 # SQLite 데이터베이스 파일이 존재하는 /data 디렉터리를 생성
 RUN mkdir -p /data
