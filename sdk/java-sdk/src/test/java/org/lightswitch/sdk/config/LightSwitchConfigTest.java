@@ -12,14 +12,12 @@ class LightSwitchConfigTest {
         LightSwitchConfig config = new LightSwitchConfig.Builder()
                 .serverUrl("https://api.lightswitch.com")
                 .sdkKey("test-key")
-                .useCache(false)
                 .reconnectDelay(3000)
                 .connectionTimeout(15000)
                 .build();
 
         assertEquals("https://api.lightswitch.com", config.getServerUrl());
         assertEquals("test-key", config.getSdkKey());
-        assertFalse(config.isUseCache());
         assertEquals(3000, config.getReconnectDelay());
         assertEquals(15000, config.getConnectionTimeout());
     }
@@ -31,7 +29,6 @@ class LightSwitchConfigTest {
                 .sdkKey("test-key")
                 .build();
 
-        assertTrue(config.isUseCache());
         assertEquals(5000, config.getReconnectDelay());
         assertEquals(10000, config.getConnectionTimeout());
     }
