@@ -1,0 +1,53 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lightswitch-frontend
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - lightswitch-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lightswitch-backend
+    # restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - lightswitch-network
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlite:lightswitch-dev.sqlite"
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.sqlite.JDBC"
+    volumes:
+      - sqlite_data:/data
+    depends_on:
+      - database
+
+  database:
+    image: alpine:latest
+    container_name: lightswitch_db
+    restart: always
+    networks:
+      - lightswitch-network
+    volumes:
+      - sqlite_data:/data
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache sqlite && \
+        touch /data/lightswitch-dev.sqlite && \
+        tail -f /dev/null
+
+networks:
+  lightswitch-network:
+
+volumes:
+  sqlite_data:
