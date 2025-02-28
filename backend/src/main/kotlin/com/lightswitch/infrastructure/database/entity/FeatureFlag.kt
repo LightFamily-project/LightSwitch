@@ -25,12 +25,12 @@ class FeatureFlag(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
     @Column(nullable = false)
-    val name: String,
+    var name: String,
     @Column(nullable = false)
-    val description: String,
+    var description: String,
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    val type: Type,
+    var type: Type,
     @Column(nullable = false)
     var enabled: Boolean,
     @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], optional = true)
@@ -44,4 +44,21 @@ class FeatureFlag(
     @LastModifiedBy
     @ManyToOne(fetch = FetchType.LAZY)
     var updatedBy: User,
-) : BaseEntity()
+) : BaseEntity() {
+    fun addDefaultCondition(
+        key: String,
+        value: Any,
+    ) {
+        val condition = Condition(flag = this, key = key, value = value)
+        defaultCondition = condition
+        conditions.add(condition)
+    }
+
+    fun addCondition(
+        key: String,
+        value: Any,
+    ) {
+        val condition = Condition(flag = this, key = key, value = value)
+        conditions.add(condition)
+    }
+}

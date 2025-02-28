@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface FeatureFlagRepository : JpaRepository<FeatureFlag, Int> {
+    fun existsByName(name: String): Boolean
+
     @EntityGraph(attributePaths = ["createdBy", "updatedBy", "defaultCondition", "conditions"])
     fun findByName(name: String): FeatureFlag?
 

@@ -1,6 +1,5 @@
 package com.lightswitch.application.service
 
-import com.lightswitch.infrastructure.database.entity.Condition
 import com.lightswitch.infrastructure.database.entity.FeatureFlag
 import com.lightswitch.infrastructure.database.entity.User
 import com.lightswitch.infrastructure.database.model.Type
@@ -8,6 +7,10 @@ import com.lightswitch.infrastructure.database.repository.ConditionRepository
 import com.lightswitch.infrastructure.database.repository.FeatureFlagRepository
 import com.lightswitch.presentation.exception.BusinessException
 import com.lightswitch.presentation.model.flag.CreateFeatureFlagRequest
+import com.lightswitch.presentation.model.flag.UpdateFeatureFlagRequest
+import com.lightswitch.presentation.model.flag.defaultValueAsPair
+import com.lightswitch.presentation.model.flag.variantPairs
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,7 +24,7 @@ class FeatureFlagService(
     }
 
     fun getFlagOrThrow(key: String): FeatureFlag {
-        return featureFlagRepository.findByName(key) ?: throw BusinessException("Feature flag $key does not exist")
+        return featureFlagRepository.findByName(key) ?: throw EntityNotFoundException("Feature flag $key does not exist")
     }
 
     @Transactional
@@ -29,7 +32,7 @@ class FeatureFlagService(
         user: User,
         request: CreateFeatureFlagRequest,
     ): FeatureFlag {
-        featureFlagRepository.findByName(request.key)?.let {
+        if (featureFlagRepository.existsByName(request.key)) {
             throw BusinessException("FeatureFlag with key ${request.key} already exists")
         }
 
@@ -46,17 +49,37 @@ class FeatureFlagService(
             )
 
         request.defaultValueAsPair()
-            .let { (key, value) -> Condition(flag = flag, key = key, value = value) }
-            .let { conditionRepository.save(it) }
-            .also {
-                flag.defaultCondition = it
-                flag.conditions.add(it)
-            }
-
+            .let { (key, value) -> flag.addDefaultCondition(key = key, value = value) }
         request.variantPairs()
-            ?.map { variant -> Condition(flag = flag, key = variant.first, value = variant.second) }
-            ?.let { conditionRepository.saveAll(it) }
-            ?.also { flag.conditions.addAll(it) }
+            ?.map { variant -> flag.addCondition(key = variant.first, value = variant.second) }
+
+        return featureFlagRepository.save(flag)
+    }
+
+    @Transactional
+    fun update(
+        user: User,
+        key: String,
+        request: UpdateFeatureFlagRequest,
+    ): FeatureFlag {
+        if (request.key != key && featureFlagRepository.existsByName(request.key)) {
+            throw BusinessException("FeatureFlag with key ${request.key} already exists")
+        }
+
+        val flag = getFlagOrThrow(key)
+        flag.name = request.key
+        flag.type = Type.from(request.type)
+        flag.description = request.description
+        flag.updatedBy = user
+
+        flag.defaultCondition = null
+        flag.conditions.clear()
+        conditionRepository.deleteByFlag(flag)
+
+        request.defaultValueAsPair()
+            .let { (key, value) -> flag.addDefaultCondition(key = key, value = value) }
+        request.variantPairs()
+            ?.map { variant -> flag.addCondition(key = variant.first, value = variant.second) }
 
         return featureFlagRepository.save(flag)
     }
