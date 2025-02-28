@@ -5,14 +5,12 @@ import org.lightswitch.sdk.exception.LightSwitchConfigException;
 public class LightSwitchConfig {
 
     private final String serverUrl;
-    private final boolean useCache;
     private final String sdkKey;
     private final int reconnectDelay;
     private final int connectionTimeout;
 
     private LightSwitchConfig(Builder builder) {
         this.serverUrl = builder.serverUrl;
-        this.useCache = builder.useCache;
         this.sdkKey = builder.sdkKey;
         this.reconnectDelay = builder.reconnectDelay;
         this.connectionTimeout = builder.connectionTimeout;
@@ -20,7 +18,6 @@ public class LightSwitchConfig {
 
     public static class Builder {
         private String serverUrl;
-        private boolean useCache = true;
         private String sdkKey;
         private int reconnectDelay = 5000;
         private int connectionTimeout = 10000;
@@ -32,11 +29,6 @@ public class LightSwitchConfig {
             }
 
             this.serverUrl = serverUrl;
-            return this;
-        }
-
-        public Builder useCache(boolean useCache) {
-            this.useCache = useCache;
             return this;
         }
 
@@ -68,10 +60,6 @@ public class LightSwitchConfig {
 
     public String getServerUrl() {
         return serverUrl;
-    }
-
-    public boolean isUseCache() {
-        return useCache;
     }
 
     public String getSdkKey() {
