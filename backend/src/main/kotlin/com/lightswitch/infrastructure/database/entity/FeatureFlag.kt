@@ -14,10 +14,12 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import org.hibernate.annotations.SQLRestriction
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.LastModifiedBy
 
 @Entity
+@SQLRestriction("deleted_at is null")
 class FeatureFlag(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

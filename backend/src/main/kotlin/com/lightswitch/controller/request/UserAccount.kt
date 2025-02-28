@@ -10,5 +10,5 @@ data class UserAccount(
     val username: String,
     @Schema(description = "The password of the user.")
     @field:NotBlank(message = "Password is required.")
-    val password: String
+    val password: String,
 )

@@ -29,16 +29,16 @@ class FeatureFlagController(
     private val featureFlagService: FeatureFlagService,
     private val userRepository: UserRepository,
 ) {
-
     @Operation(
         summary = "Retrieve all feature flags",
     )
     @GetMapping
     fun getFlags(): PayloadResponse<List<FeatureFlagResponse>> {
-        return PayloadResponse<List<FeatureFlagResponse>>(
-            status = "status",
-            message = "message",
-            data = listOf()
+        val flags = featureFlagService.getFlags()
+
+        return PayloadResponse.success(
+            message = "Fetched all feature flags successfully",
+            data = flags.map { FeatureFlagResponse.from(it) },
         )
     }
 
@@ -49,10 +49,11 @@ class FeatureFlagController(
     fun getFlag(
         @PathVariable key: String,
     ): PayloadResponse<FeatureFlagResponse> {
-        return PayloadResponse<FeatureFlagResponse>(
-            status = "status",
-            message = "message",
-            data = null
+        val flag = featureFlagService.getFlagOrThrow(key)
+
+        return PayloadResponse.success(
+            message = "Fetched a flag successfully",
+            data = FeatureFlagResponse.from(flag),
         )
     }
 
@@ -72,7 +73,7 @@ class FeatureFlagController(
 
         return PayloadResponse.success(
             message = "Created flag successfully",
-            data = FeatureFlagResponse.from(flag)
+            data = FeatureFlagResponse.from(flag),
         )
     }
 
@@ -87,7 +88,7 @@ class FeatureFlagController(
         return PayloadResponse<FeatureFlagResponse>(
             status = "status",
             message = "message",
-            data = null
+            data = null,
         )
     }
 
@@ -102,7 +103,7 @@ class FeatureFlagController(
         return PayloadResponse<FeatureFlagResponse>(
             status = "status",
             message = "message",
-            data = null
+            data = null,
         )
     }
 
