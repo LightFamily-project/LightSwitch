@@ -83,4 +83,15 @@ class FeatureFlagService(
 
         return featureFlagRepository.save(flag)
     }
+
+    @Transactional
+    fun update(
+        user: User,
+        key: String,
+        enabled: Boolean,
+    ) {
+        val flag = getFlagOrThrow(key)
+        flag.enabled = enabled
+        featureFlagRepository.save(flag)
+    }
 }

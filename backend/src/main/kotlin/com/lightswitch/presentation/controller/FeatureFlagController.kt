@@ -104,13 +104,15 @@ class FeatureFlagController(
     @PatchMapping("/{key}")
     fun updateFlagStatus(
         @PathVariable key: String,
-        @RequestParam status: String,
-    ): PayloadResponse<FeatureFlagResponse> {
-        return PayloadResponse<FeatureFlagResponse>(
-            status = "status",
-            message = "message",
-            data = null,
-        )
+        @RequestParam status: Boolean,
+    ): StatusResponse {
+        // TODO: Improve the way finding the authenticated user.
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+        val user = userRepository.findByIdOrNull(userId.toLong()) ?: throw BusinessException("User not found")
+
+        featureFlagService.update(user, key, status)
+        return StatusResponse.success("Successfully updated the status")
     }
 
     @Operation(
