@@ -83,7 +83,7 @@ class FeatureFlagController(
     @PutMapping("/{key}")
     fun updateFlag(
         @PathVariable key: String,
-        @RequestBody request: UpdateFeatureFlagRequest,
+        @RequestBody @Valid request: UpdateFeatureFlagRequest,
     ): PayloadResponse<FeatureFlagResponse> {
         // TODO: Improve the way finding the authenticated user.
         val authentication = SecurityContextHolder.getContext().authentication
