@@ -474,6 +474,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
         val updatedFlag = featureFlagRepository.findById(flag.id!!.toInt()).orElseThrow()
 
         assertThat(updatedFlag.enabled).isTrue()
+        assertThat(updatedFlag.updatedBy).isEqualTo(user)
     }
 
     @Test

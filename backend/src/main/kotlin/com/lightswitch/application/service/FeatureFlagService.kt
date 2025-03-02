@@ -92,6 +92,7 @@ class FeatureFlagService(
     ) {
         val flag = getFlagOrThrow(key)
         flag.enabled = enabled
+        flag.updatedBy = user
         featureFlagRepository.save(flag)
     }
 }
