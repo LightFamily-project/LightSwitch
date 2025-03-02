@@ -454,6 +454,40 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             .hasMessageContaining("Unsupported type: json")
     }
 
+    @Test
+    fun `update should update feature flag status`() {
+        val user = saveTestUser()
+        val flag =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "test-flag",
+                    description = "description",
+                    type = Type.BOOLEAN,
+                    enabled = false,
+                    createdBy = user,
+                    updatedBy = user,
+                ),
+            )
+
+        featureFlagService.update(user, "test-flag", true)
+
+        val updatedFlag = featureFlagRepository.findById(flag.id!!.toInt()).orElseThrow()
+
+        assertThat(updatedFlag.enabled).isTrue()
+        assertThat(updatedFlag.updatedBy).isEqualTo(user)
+    }
+
+    @Test
+    fun `update should throw EntityNotFoundException when key does not exist`() {
+        val user = saveTestUser()
+
+        assertThatThrownBy {
+            featureFlagService.update(user, "flag-one", true)
+        }
+            .isInstanceOf(EntityNotFoundException::class.java)
+            .hasMessageContaining("Feature flag flag-one does not exist")
+    }
+
     private fun saveTestUser() =
         userRepository.save(
             User(
