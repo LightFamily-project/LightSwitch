@@ -13,6 +13,7 @@ import com.lightswitch.presentation.model.flag.variantPairs
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 @Service
 class FeatureFlagService(
@@ -72,9 +73,11 @@ class FeatureFlagService(
         flag.description = request.description
         flag.updatedBy = user
 
+        flag.conditions.forEach { it.deletedAt = Instant.now() }
+        conditionRepository.saveAllAndFlush(flag.conditions)
+
         flag.defaultCondition = null
         flag.conditions.clear()
-        conditionRepository.deleteByFlag(flag)
 
         request.defaultValueAsPair()
             .let { (key, value) -> flag.addDefaultCondition(key = key, value = value) }
@@ -94,5 +97,21 @@ class FeatureFlagService(
         flag.enabled = enabled
         flag.updatedBy = user
         featureFlagRepository.save(flag)
+    }
+
+    @Transactional
+    fun delete(
+        user: User,
+        key: String,
+        deletedAt: Instant = Instant.now(),
+    ) {
+        val flag = getFlagOrThrow(key)
+
+        flag.updatedBy = user
+        flag.deletedAt = deletedAt
+        flag.conditions.forEach { it.deletedAt = deletedAt }
+
+        featureFlagRepository.save(flag)
+        conditionRepository.saveAll(flag.conditions)
     }
 }

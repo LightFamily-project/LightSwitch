@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 class FeatureFlagServiceTest : BaseRepositoryTest() {
     @Autowired
@@ -315,7 +316,8 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `update feature flag can update feature flag`() {
-        val user = saveTestUser()
+        val user1 = saveTestUser("user1")
+        val user2 = saveTestUser("user2")
         val flag =
             featureFlagRepository.save(
                 FeatureFlag(
@@ -323,8 +325,8 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                     description = "description",
                     type = Type.BOOLEAN,
                     enabled = true,
-                    createdBy = user,
-                    updatedBy = user,
+                    createdBy = user1,
+                    updatedBy = user1,
                 ),
             ).apply {
                 this.defaultCondition = Condition(flag = this, key = "boolean", value = true)
@@ -346,9 +348,10 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                     ),
             )
 
-        val updated = featureFlagService.update(user, "user-limit", request)
+        val updated = featureFlagService.update(user2, "user-limit", request)
 
-        assertThat(flag.id).isEqualTo(updated.id)
+        assertThat(conditionRepository.findAll()).hasSize(3)
+        assertThat(updated.id).isEqualTo(flag.id)
         assertThat(updated.name).isEqualTo("user-limit-updated")
         assertThat(updated.description).isEqualTo("Updated description")
         assertThat(updated.type).isEqualTo(Type.NUMBER)
@@ -363,7 +366,7 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                 tuple("free", 10),
                 tuple("pro", 100),
             )
-        assertThat(updated.updatedBy.id).isEqualTo(user.id)
+        assertThat(updated.updatedBy).isEqualTo(user2)
     }
 
     @Test
@@ -456,7 +459,8 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
 
     @Test
     fun `update should update feature flag status`() {
-        val user = saveTestUser()
+        val user1 = saveTestUser("user1")
+        val user2 = saveTestUser("user2")
         val flag =
             featureFlagRepository.save(
                 FeatureFlag(
@@ -464,17 +468,17 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
                     description = "description",
                     type = Type.BOOLEAN,
                     enabled = false,
-                    createdBy = user,
-                    updatedBy = user,
+                    createdBy = user1,
+                    updatedBy = user1,
                 ),
             )
 
-        featureFlagService.update(user, "test-flag", true)
+        featureFlagService.update(user2, "test-flag", true)
 
         val updatedFlag = featureFlagRepository.findById(flag.id!!.toInt()).orElseThrow()
 
         assertThat(updatedFlag.enabled).isTrue()
-        assertThat(updatedFlag.updatedBy).isEqualTo(user)
+        assertThat(updatedFlag.updatedBy).isEqualTo(user2)
     }
 
     @Test
@@ -488,10 +492,52 @@ class FeatureFlagServiceTest : BaseRepositoryTest() {
             .hasMessageContaining("Feature flag flag-one does not exist")
     }
 
-    private fun saveTestUser() =
+    @Test
+    fun `delete should remove feature flag successfully`() {
+        val deletedAt = LocalDate.of(2025, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+        val user1 = saveTestUser("user1")
+        val user2 = saveTestUser("user2")
+        val flag =
+            featureFlagRepository.save(
+                FeatureFlag(
+                    name = "test-flag",
+                    description = "Test flag for deletion",
+                    type = Type.BOOLEAN,
+                    enabled = true,
+                    createdBy = user1,
+                    updatedBy = user1,
+                ),
+            ).apply {
+                this.defaultCondition = Condition(flag = this, key = "boolean", value = true)
+                this.conditions.add(this.defaultCondition!!)
+                this.conditions.add(Condition(flag = this, key = "free", value = true))
+            }.let {
+                featureFlagRepository.save(it)
+            }
+
+        featureFlagService.delete(user2, "test-flag", deletedAt)
+
+        val deleted = featureFlagRepository.findById(flag.id!!.toInt()).get()
+        assertThat(deleted.updatedBy).isEqualTo(user2)
+        assertThat(deleted.deletedAt).isEqualTo(deletedAt)
+        assertThat(deleted.conditions).hasSize(2).allMatch { it.deletedAt == deletedAt }
+        assertThat(featureFlagRepository.findAll()).isEmpty()
+        assertThat(conditionRepository.findAll()).isEmpty()
+    }
+
+    @Test
+    fun `delete should throw EntityNotFoundException when flag does not exist`() {
+        val user = saveTestUser()
+
+        assertThatThrownBy { featureFlagService.delete(user, "non-existent-flag") }
+            .isInstanceOf(EntityNotFoundException::class.java)
+            .hasMessageContaining("Feature flag non-existent-flag does not exist")
+    }
+
+    private fun saveTestUser(username: String = "test-user") =
         userRepository.save(
             User(
-                username = "test-user",
+                username = username,
                 passwordHash = "test-pass",
                 lastLoginAt = LocalDate.of(2025, 1, 1).atStartOfDay(),
             ),

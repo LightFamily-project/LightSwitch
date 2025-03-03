@@ -122,9 +122,13 @@ class FeatureFlagController(
     fun deleteFlag(
         @PathVariable key: String,
     ): StatusResponse {
-        return StatusResponse(
-            status = "status",
-            message = "message",
-        )
+        // TODO: Improve the way finding the authenticated user.
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+        val user = userRepository.findByIdOrNull(userId.toLong()) ?: throw BusinessException("User not found")
+
+        featureFlagService.delete(user, key)
+
+        return StatusResponse.success("Successfully deleted the feature flag")
     }
 }
