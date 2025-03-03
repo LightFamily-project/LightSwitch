@@ -10,8 +10,10 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
+@SQLRestriction("deleted_at is null")
 class Condition(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

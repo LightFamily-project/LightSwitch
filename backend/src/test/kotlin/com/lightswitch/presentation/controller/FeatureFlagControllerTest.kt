@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
@@ -23,6 +24,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -481,6 +483,39 @@ class FeatureFlagControllerTest {
 
         mockMvc.perform(
             patch("/api/v1/flags/test-flag?status=false")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.message").value("Entity not found"))
+    }
+
+    @Test
+    @WithMockUser(username = "1")
+    fun `DELETE flags should delete a feature flag successfully`() {
+        `when`(userRepository.findById(1L)).thenReturn(Optional.of(user))
+        doNothing().`when`(featureFlagService).delete(user, "test-flag")
+
+        mockMvc.perform(
+            delete("/api/v1/flags/test-flag")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.status").value("Success"))
+            .andExpect(jsonPath("$.message").value("Successfully deleted the feature flag"))
+            .andDo(print())
+    }
+
+    @Test
+    @WithMockUser(username = "1")
+    fun `DELETE flags return 400 when flag does not exist`() {
+        `when`(userRepository.findById(1L)).thenReturn(Optional.of(user))
+        `when`(featureFlagService.delete(any(), any(), any())).thenThrow(EntityNotFoundException())
+
+        mockMvc.perform(
+            delete("/api/v1/flags/test-flag")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON),
         )
